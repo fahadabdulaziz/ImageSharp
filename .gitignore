@@ -218,3 +218,4 @@ artifacts/
 **/CodeCoverage/*
 docs/
 /samples/AvatarWithRoundedCorner/output
+*.snk
