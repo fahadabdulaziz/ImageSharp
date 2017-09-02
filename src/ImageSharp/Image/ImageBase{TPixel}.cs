@@ -223,7 +223,7 @@ namespace ImageSharp
         /// <returns>byte[]</returns>
         public byte[] GetBytes()
         {
-            return this.Pixels.NonPortableCast<TPixel, byte>().ToArray();
+            return this.Pixels.AsBytes().ToArray();
         }
 
         /// <summary>
