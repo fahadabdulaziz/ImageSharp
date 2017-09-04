@@ -1,16 +1,11 @@
-﻿// <copyright file="IImageProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp
 {
-    using System;
-    using System.Threading.Tasks;
-
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Encapsulates methods to alter the pixels of an image.
     /// </summary>
@@ -18,17 +13,6 @@ namespace ImageSharp.Processing
     public interface IImageProcessor<TPixel>
         where TPixel : struct, IPixel<TPixel>
     {
-        /// <summary>
-        /// Gets or sets the parallel options for processing tasks in parallel.
-        /// </summary>
-        ParallelOptions ParallelOptions { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to compress
-        /// or expand individual pixel colors the value on processing.
-        /// </summary>
-        bool Compand { get; set; }
-
         /// <summary>
         /// Applies the process to the specified portion of the specified <see cref="ImageBase{TPixel}"/>.
         /// </summary>
@@ -42,6 +26,6 @@ namespace ImageSharp.Processing
         /// <exception cref="System.ArgumentException">
         /// <paramref name="sourceRectangle"/> doesnt fit the dimension of the image.
         /// </exception>
-        void Apply(ImageBase<TPixel> source, Rectangle sourceRectangle);
+        void Apply(Image<TPixel> source, Rectangle sourceRectangle);
     }
 }

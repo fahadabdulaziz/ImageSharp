@@ -1,18 +1,17 @@
-﻿// <copyright file="Image.LoadPixelData.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp
+using System;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+
+namespace SixLabors.ImageSharp
 {
-    using System;
-    using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Threading.Tasks;
-    using Formats;
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-
     /// <content>
     /// Adds static methods allowing the creation of new image from raw pixel data.
     /// </content>
@@ -71,7 +70,7 @@ namespace ImageSharp
             Guard.MustBeGreaterThanOrEqualTo(data.Length, count, nameof(data));
 
             var image = new Image<TPixel>(config, width, height);
-            SpanHelper.Copy(data, image.Pixels, count);
+            SpanHelper.Copy(data, image.GetPixelSpan(), count);
 
             return image;
         }

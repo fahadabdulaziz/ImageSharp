@@ -1,21 +1,19 @@
-﻿// <copyright file="FillProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Drawing.Processors
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Brushes;
+using SixLabors.ImageSharp.Drawing.Brushes.Processors;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Drawing.Processors
 {
-    using System;
-    using System.Numerics;
-    using System.Threading.Tasks;
-
-    using Drawing;
-
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using ImageSharp.Processing;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Using the bursh as a source of pixels colors blends the brush color with source.
     /// </summary>
@@ -81,7 +79,7 @@ namespace ImageSharp.Drawing.Processors
                     Parallel.For(
                     minY,
                     maxY,
-                    this.ParallelOptions,
+                    source.Configuration.ParallelOptions,
                     y =>
                     {
                         int offsetY = y - startY;

@@ -1,18 +1,17 @@
-﻿// <copyright file="RecolorBrush{TPixel}.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Drawing.Brushes
+using System;
+using System.Numerics;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Drawing.Brushes.Processors;
+using SixLabors.ImageSharp.Drawing.Processors;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Drawing.Brushes
 {
-    using System;
-    using System.Numerics;
-
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using Processors;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Provides an implementation of a brush that can recolor an image
     /// </summary>
@@ -159,7 +158,7 @@ namespace ImageSharp.Drawing.Brushes
                         overlay[i] = this[offsetX, y];
                     }
 
-                    Span<TPixel> destinationRow = this.Target.GetRowSpan(x, y).Slice(0, scanline.Length);
+                    Span<TPixel> destinationRow = this.Target.GetPixelRowSpan(y).Slice(x, scanline.Length);
                     this.Blender.Blend(destinationRow, destinationRow, overlay, amountBuffer);
                 }
             }

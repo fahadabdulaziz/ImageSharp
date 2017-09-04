@@ -1,12 +1,11 @@
-﻿// <copyright file="IImage.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp
+using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.MetaData;
+
+namespace SixLabors.ImageSharp
 {
-    using Formats;
-
     /// <summary>
     /// Encapsulates the basic properties and methods required to manipulate images.
     /// </summary>

@@ -1,17 +1,15 @@
-﻿// <copyright file="SkewProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing.Processors
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Processing.Processors
 {
-    using System;
-    using System.Numerics;
-    using System.Threading.Tasks;
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Provides methods that allow the skewing of images.
     /// </summary>
@@ -45,13 +43,14 @@ namespace ImageSharp.Processing.Processors
             int height = this.CanvasRectangle.Height;
             int width = this.CanvasRectangle.Width;
             Matrix3x2 matrix = this.GetCenteredMatrix(source, this.processMatrix);
+            Rectangle sourceBounds = source.Bounds();
 
             using (var targetPixels = new PixelAccessor<TPixel>(width, height))
             {
                 Parallel.For(
                     0,
                     height,
-                    this.ParallelOptions,
+                    source.Configuration.ParallelOptions,
                     y =>
                         {
                             Span<TPixel> targetRow = targetPixels.GetRowSpan(y);
@@ -60,7 +59,7 @@ namespace ImageSharp.Processing.Processors
                             {
                                 var transformedPoint = Point.Skew(new Point(x, y), matrix);
 
-                                if (source.Bounds.Contains(transformedPoint.X, transformedPoint.Y))
+                                if (sourceBounds.Contains(transformedPoint.X, transformedPoint.Y))
                                 {
                                     targetRow[x] = source[transformedPoint.X, transformedPoint.Y];
                                 }
@@ -74,7 +73,7 @@ namespace ImageSharp.Processing.Processors
         /// <inheritdoc/>
         protected override void BeforeApply(ImageBase<TPixel> source, Rectangle sourceRectangle)
         {
-            this.processMatrix = Matrix3x2Extensions.CreateSkew(-this.AngleX, -this.AngleY, new Point(0, 0));
+            this.processMatrix = Matrix3x2Extensions.CreateSkewDegrees(-this.AngleX, -this.AngleY, new Point(0, 0));
             if (this.Expand)
             {
                 this.CreateNewCanvas(sourceRectangle, this.processMatrix);

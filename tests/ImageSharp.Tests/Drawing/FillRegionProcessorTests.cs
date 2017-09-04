@@ -1,17 +1,19 @@
-﻿
-namespace ImageSharp.Tests.Drawing
+﻿// Copyright (c) Six Labors and contributors.
+// Licensed under the Apache License, Version 2.0.
+
+using System;
+using System.Numerics;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Pens;
+using SixLabors.ImageSharp.Drawing.Processors;
+using SixLabors.ImageSharp.PixelFormats;
+using Moq;
+using Xunit;
+using SixLabors.ImageSharp.Drawing.Brushes;
+
+namespace SixLabors.ImageSharp.Tests.Drawing
 {
-    using ImageSharp;
-    using Xunit;
-    using ImageSharp.Drawing;
-    using ImageSharp.Drawing.Processors;
-    using Moq;
-
-    using ImageSharp.PixelFormats;
-    using System;
-    using ImageSharp.Drawing.Pens;
-    using System.Numerics;
-
     public class FillRegionProcessorTests
     {
         [Theory]
@@ -71,18 +73,16 @@ namespace ImageSharp.Tests.Drawing
             processor.Apply(img, bounds);
         }
 
-
-
         [Fact]
         public void DrawOffCanvas()
         {
 
             using (var img = new Image<Rgba32>(10, 10))
             {
-                img.DrawLines(new Pen<Rgba32>(Rgba32.Black, 10), new SixLabors.Primitives.PointF[] {
+                img.Mutate(x => x.DrawLines(new Pen<Rgba32>(Rgba32.Black, 10), new SixLabors.Primitives.PointF[] {
                     new Vector2(-10, 5),
                     new Vector2(20, 5),
-                });
+                }));
             }
         }
     }

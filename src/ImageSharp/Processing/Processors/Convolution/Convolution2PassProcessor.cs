@@ -1,18 +1,15 @@
-﻿// <copyright file="Convolution2PassProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing.Processors
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Processing.Processors
 {
-    using System;
-    using System.Numerics;
-    using System.Threading.Tasks;
-
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Defines a sampler that uses two one-dimensional matrices to perform two-pass convolution against an image.
     /// </summary>
@@ -46,12 +43,13 @@ namespace ImageSharp.Processing.Processors
         {
             int width = source.Width;
             int height = source.Height;
+            ParallelOptions parallelOptions = source.Configuration.ParallelOptions;
 
             using (var firstPassPixels = new PixelAccessor<TPixel>(width, height))
             using (PixelAccessor<TPixel> sourcePixels = source.Lock())
             {
-                this.ApplyConvolution(firstPassPixels, sourcePixels, source.Bounds, this.KernelX);
-                this.ApplyConvolution(sourcePixels, firstPassPixels, sourceRectangle, this.KernelY);
+                this.ApplyConvolution(firstPassPixels, sourcePixels, source.Bounds(), this.KernelX, parallelOptions);
+                this.ApplyConvolution(sourcePixels, firstPassPixels, sourceRectangle, this.KernelY, parallelOptions);
             }
         }
 
@@ -65,7 +63,13 @@ namespace ImageSharp.Processing.Processors
         /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to draw.
         /// </param>
         /// <param name="kernel">The kernel operator.</param>
-        private void ApplyConvolution(PixelAccessor<TPixel> targetPixels, PixelAccessor<TPixel> sourcePixels, Rectangle sourceRectangle, Fast2DArray<float> kernel)
+        /// <param name="parallelOptions">The parellel options</param>
+        private void ApplyConvolution(
+            PixelAccessor<TPixel> targetPixels,
+            PixelAccessor<TPixel> sourcePixels,
+            Rectangle sourceRectangle,
+            Fast2DArray<float> kernel,
+            ParallelOptions parallelOptions)
         {
             int kernelHeight = kernel.Height;
             int kernelWidth = kernel.Width;
@@ -82,7 +86,7 @@ namespace ImageSharp.Processing.Processors
             Parallel.For(
                 startY,
                 endY,
-                this.ParallelOptions,
+                parallelOptions,
                 y =>
                 {
                     Span<TPixel> targetRow = targetPixels.GetRowSpan(y);

@@ -1,38 +1,25 @@
-﻿// <copyright file="ImageBase{TPixel}.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp
 {
-    using System;
-    using System.Diagnostics;
-    using System.Runtime.CompilerServices;
-
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using ImageSharp.Processing;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// The base class of all images. Encapsulates the basic properties and methods required to manipulate
     /// images in different pixel formats.
     /// </summary>
     /// <typeparam name="TPixel">The pixel format.</typeparam>
-    [DebuggerDisplay("Image: {Width}x{Height}")]
-    public abstract class ImageBase<TPixel> : IImageBase<TPixel>
+    public abstract class ImageBase<TPixel> : IImageBase, IDisposable, IPixelSource<TPixel>
         where TPixel : struct, IPixel<TPixel>
     {
-        /// <summary>
-        /// Gets or sets the maximum allowable width in pixels.
-        /// </summary>
-        public const int MaxWidth = int.MaxValue;
-
-        /// <summary>
-        /// Gets or sets the maximum allowable height in pixels.
-        /// </summary>
-        public const int MaxHeight = int.MaxValue;
-
 #pragma warning disable SA1401 // Fields must be private
         /// <summary>
         /// The image pixels. Not private as Buffer2D requires an array in its constructor.
@@ -105,28 +92,18 @@ namespace ImageSharp
 
             // Rent then copy the pixels. Unsafe.CopyBlock gives us a nice speed boost here.
             this.RentPixels();
-            using (PixelAccessor<TPixel> sourcePixels = other.Lock())
-            using (PixelAccessor<TPixel> target = this.Lock())
-            {
-                // Check we can do this without crashing
-                sourcePixels.CopyTo(target);
-            }
+
+            other.GetPixelSpan().CopyTo(this.GetPixelSpan());
         }
 
         /// <inheritdoc/>
-        public Span<TPixel> Pixels => new Span<TPixel>(this.PixelBuffer, 0, this.Width * this.Height);
+        Span<TPixel> IPixelSource<TPixel>.Span => new Span<TPixel>(this.PixelBuffer, 0, this.Width * this.Height);
 
         /// <inheritdoc/>
         public int Width { get; private set; }
 
         /// <inheritdoc/>
         public int Height { get; private set; }
-
-        /// <inheritdoc/>
-        public double PixelRatio => (double)this.Width / this.Height;
-
-        /// <inheritdoc/>
-        public Rectangle Bounds => new Rectangle(0, 0, this.Width, this.Height);
 
         /// <summary>
         /// Gets the configuration providing initialization code which allows extending the library.
@@ -163,45 +140,19 @@ namespace ImageSharp
         /// <param name="y">The y-coordinate of the pixel. Must be greater than or equal to zero and less than the height of the image.</param>
         /// <returns>The <see typeparam="TPixel"/> at the specified position.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public ref TPixel GetPixelReference(int x, int y)
+        internal ref TPixel GetPixelReference(int x, int y)
         {
             this.CheckCoordinates(x, y);
             return ref this.PixelBuffer[(y * this.Width) + x];
         }
 
         /// <summary>
-        /// Gets a <see cref="Span{TPixal}"/> representing the row 'y' beginning from the the first pixel on that row.
+        /// Clones the image
         /// </summary>
-        /// <param name="y">The y-coordinate of the pixel row. Must be greater than or equal to zero and less than the height of the image.</param>
-        /// <returns>The <see cref="Span{TPixel}"/></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<TPixel> GetRowSpan(int y)
+        /// <returns>A new items which is a clone of the original.</returns>
+        public ImageBase<TPixel> Clone()
         {
-            this.CheckCoordinates(y);
-            return this.Pixels.Slice(y * this.Width, this.Width);
-        }
-
-        /// <summary>
-        /// Gets a <see cref="Span{T}"/> to the row 'y' beginning from the pixel at 'x'.
-        /// </summary>
-        /// <param name="x">The x coordinate (position in the row)</param>
-        /// <param name="y">The y (row) coordinate</param>
-        /// <returns>The <see cref="Span{TPixel}"/></returns>
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Span<TPixel> GetRowSpan(int x, int y)
-        {
-            this.CheckCoordinates(x, y);
-            return this.Pixels.Slice((y * this.Width) + x, this.Width - x);
-        }
-
-        /// <summary>
-        /// Applies the processor.
-        /// </summary>
-        /// <param name="processor">The processor.</param>
-        /// <param name="rectangle">The rectangle.</param>
-        public virtual void ApplyProcessor(IImageProcessor<TPixel> processor, Rectangle rectangle)
-        {
-            processor.Apply(this, rectangle);
+            return this.CloneImageBase();
         }
 
         /// <inheritdoc />
@@ -244,7 +195,7 @@ namespace ImageSharp
         /// <param name="target">The target pixel buffer accessor.</param>
         internal void CopyTo(PixelAccessor<TPixel> target)
         {
-            SpanHelper.Copy(this.Pixels, target.PixelBuffer.Span);
+            SpanHelper.Copy(this.GetPixelSpan(), target.PixelBuffer.Span);
         }
 
         /// <summary>
@@ -266,6 +217,33 @@ namespace ImageSharp
         }
 
         /// <summary>
+        /// Switches the buffers used by the image and the pixelSource meaning that the Image will "own" the buffer from the pixelSource and the pixelSource will now own the Images buffer.
+        /// </summary>
+        /// <param name="pixelSource">The pixel source.</param>
+        internal void SwapPixelsData(ImageBase<TPixel> pixelSource)
+        {
+            Guard.NotNull(pixelSource, nameof(pixelSource));
+
+            int newWidth = pixelSource.Width;
+            int newHeight = pixelSource.Height;
+            TPixel[] newPixels = pixelSource.PixelBuffer;
+
+            pixelSource.PixelBuffer = this.PixelBuffer;
+            pixelSource.Width = this.Width;
+            pixelSource.Height = this.Height;
+
+            this.Width = newWidth;
+            this.Height = newHeight;
+            this.PixelBuffer = newPixels;
+        }
+
+        /// <summary>
+        /// Clones the image
+        /// </summary>
+        /// <returns>A new items which is a clone of the original.</returns>
+        protected abstract ImageBase<TPixel> CloneImageBase();
+
+        /// <summary>
         /// Copies the properties from the other <see cref="IImageBase"/>.
         /// </summary>
         /// <param name="other">
@@ -279,14 +257,6 @@ namespace ImageSharp
         }
 
         /// <summary>
-        /// Releases any unmanaged resources from the inheriting class.
-        /// </summary>
-        protected virtual void ReleaseUnmanagedResources()
-        {
-            // TODO release unmanaged resources here
-        }
-
-        /// <summary>
         /// Disposes the object and frees resources for the Garbage Collector.
         /// </summary>
         /// <param name="disposing">If true, the object gets disposed.</param>
@@ -296,8 +266,6 @@ namespace ImageSharp
             {
                 return;
             }
-
-            this.ReleaseUnmanagedResources();
 
             if (disposing)
             {

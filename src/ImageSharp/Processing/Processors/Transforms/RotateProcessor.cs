@@ -1,17 +1,16 @@
-﻿// <copyright file="RotateProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing.Processors
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Processing.Processors
 {
-    using System;
-    using System.Numerics;
-    using System.Threading.Tasks;
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Provides methods that allow the rotating of images.
     /// </summary>
@@ -45,13 +44,14 @@ namespace ImageSharp.Processing.Processors
             int height = this.CanvasRectangle.Height;
             int width = this.CanvasRectangle.Width;
             Matrix3x2 matrix = this.GetCenteredMatrix(source, this.processMatrix);
+            Rectangle sourceBounds = source.Bounds();
 
             using (var targetPixels = new PixelAccessor<TPixel>(width, height))
             {
                 Parallel.For(
                     0,
                     height,
-                    this.ParallelOptions,
+                    source.Configuration.ParallelOptions,
                     y =>
                     {
                         Span<TPixel> targetRow = targetPixels.GetRowSpan(y);
@@ -60,7 +60,7 @@ namespace ImageSharp.Processing.Processors
                         {
                             var transformedPoint = Point.Rotate(new Point(x, y), matrix);
 
-                            if (source.Bounds.Contains(transformedPoint.X, transformedPoint.Y))
+                            if (sourceBounds.Contains(transformedPoint.X, transformedPoint.Y))
                             {
                                 targetRow[x] = source[transformedPoint.X, transformedPoint.Y];
                             }
@@ -136,7 +136,7 @@ namespace ImageSharp.Processing.Processors
                     Parallel.For(
                         0,
                         height,
-                        this.ParallelOptions,
+                        source.Configuration.ParallelOptions,
                         y =>
                         {
                             for (int x = 0; x < width; x++)
@@ -167,10 +167,10 @@ namespace ImageSharp.Processing.Processors
                 Parallel.For(
                     0,
                     height,
-                    this.ParallelOptions,
+                    source.Configuration.ParallelOptions,
                     y =>
                     {
-                        Span<TPixel> sourceRow = source.GetRowSpan(y);
+                        Span<TPixel> sourceRow = source.GetPixelRowSpan(y);
                         Span<TPixel> targetRow = targetPixels.GetRowSpan(height - y - 1);
 
                         for (int x = 0; x < width; x++)
@@ -197,10 +197,10 @@ namespace ImageSharp.Processing.Processors
                 Parallel.For(
                     0,
                     height,
-                    this.ParallelOptions,
+                    source.Configuration.ParallelOptions,
                     y =>
                     {
-                        Span<TPixel> sourceRow = source.GetRowSpan(y);
+                        Span<TPixel> sourceRow = source.GetPixelRowSpan(y);
                         int newX = height - y - 1;
                         for (int x = 0; x < width; x++)
                         {

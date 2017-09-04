@@ -1,17 +1,14 @@
-// <copyright file="JpegProfilingBenchmarks.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Tests
+namespace SixLabors.ImageSharp.Tests.Formats.Jpg
 {
     using System;
     using System.IO;
     using System.Linq;
     using System.Numerics;
 
-    using ImageSharp.Formats;
-    using ImageSharp.PixelFormats;
+    using SixLabors.ImageSharp.Formats.Jpeg;
 
     using Xunit;
     using Xunit.Abstractions;
@@ -29,7 +26,7 @@ namespace ImageSharp.Tests
             TestImages.Jpeg.Baseline.Ycck,
             TestImages.Jpeg.Baseline.Calliphora,
             TestImages.Jpeg.Baseline.Jpeg400,
-            TestImages.Jpeg.Baseline.Jpeg420,
+            TestImages.Jpeg.Baseline.Jpeg420Exif,
             TestImages.Jpeg.Baseline.Jpeg444,
         };
 
@@ -44,7 +41,7 @@ namespace ImageSharp.Tests
                 throw new Exception("Vector.IsHardwareAccelerated == false! ('prefer32 bit' enabled?)");
             }
 
-            string path = TestFile.GetPath(fileName);
+            string path = TestFile.GetInputFileFullPath(fileName);
             byte[] bytes = File.ReadAllBytes(path);
 
             this.Measure(

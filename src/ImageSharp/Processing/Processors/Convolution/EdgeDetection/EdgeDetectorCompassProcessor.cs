@@ -1,18 +1,15 @@
-﻿// <copyright file="EdgeDetectorCompassProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing.Processors
+using System;
+using System.Numerics;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Processing.Processors
 {
-    using System;
-    using System.Numerics;
-    using System.Threading.Tasks;
-
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Defines a sampler that detects edges within an image using a eight two dimensional matrices.
     /// </summary>
@@ -89,7 +86,7 @@ namespace ImageSharp.Processing.Processors
             int maxY = Math.Min(source.Height, endY);
 
             // we need a clean copy for each pass to start from
-            using (ImageBase<TPixel> cleanCopy = new Image<TPixel>(source))
+            using (ImageBase<TPixel> cleanCopy = source.Clone())
             {
                 new ConvolutionProcessor<TPixel>(kernels[0]).Apply(source, sourceRectangle);
 
@@ -116,7 +113,7 @@ namespace ImageSharp.Processing.Processors
                 // ReSharper disable once ForCanBeConvertedToForeach
                 for (int i = 1; i < kernels.Length; i++)
                 {
-                    using (ImageBase<TPixel> pass = new Image<TPixel>(cleanCopy))
+                    using (ImageBase<TPixel> pass = cleanCopy.Clone())
                     {
                         new ConvolutionProcessor<TPixel>(kernels[i]).Apply(pass, sourceRectangle);
 
@@ -126,7 +123,7 @@ namespace ImageSharp.Processing.Processors
                             Parallel.For(
                                 minY,
                                 maxY,
-                                this.ParallelOptions,
+                                source.Configuration.ParallelOptions,
                                 y =>
                                 {
                                     int offsetY = y - shiftY;

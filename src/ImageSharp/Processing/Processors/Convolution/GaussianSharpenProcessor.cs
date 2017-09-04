@@ -1,16 +1,13 @@
-﻿// <copyright file="GaussianSharpenProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing.Processors
+using System;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Processing.Processors
 {
-    using System;
-
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Applies a Gaussian sharpening sampler to the image.
     /// </summary>
@@ -73,6 +70,11 @@ namespace ImageSharp.Processing.Processors
             this.KernelX = this.CreateGaussianKernel(true);
             this.KernelY = this.CreateGaussianKernel(false);
         }
+
+        /// <summary>
+        /// Gets the sigma
+        /// </summary>
+        public float Sigma => this.sigma;
 
         /// <summary>
         /// Gets the horizontal gradient operator.

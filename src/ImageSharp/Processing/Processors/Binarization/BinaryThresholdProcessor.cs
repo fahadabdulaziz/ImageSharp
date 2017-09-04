@@ -1,16 +1,14 @@
-﻿// <copyright file="BinaryThresholdProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing.Processors
+using System;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Processing.Processors
 {
-    using System;
-    using System.Threading.Tasks;
-
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// An <see cref="IImageProcessor{TPixel}"/> to perform binary threshold filtering against an
     /// <see cref="Image{TPixel}"/>. The image will be converted to grayscale before thresholding occurs.
@@ -87,10 +85,10 @@ namespace ImageSharp.Processing.Processors
             Parallel.For(
                 minY,
                 maxY,
-                this.ParallelOptions,
+                source.Configuration.ParallelOptions,
                 y =>
                 {
-                    Span<TPixel> row = source.GetRowSpan(y - startY);
+                    Span<TPixel> row = source.GetPixelRowSpan(y - startY);
 
                     for (int x = minX; x < maxX; x++)
                     {

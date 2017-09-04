@@ -1,17 +1,15 @@
-﻿// <copyright file="BackgroundColorProcessor.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Processing.Processors
+using System;
+using System.Threading.Tasks;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Processing.Processors
 {
-    using System;
-    using System.Threading.Tasks;
-
-    using ImageSharp.Memory;
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Sets the background color of the image.
     /// </summary>
@@ -31,6 +29,11 @@ namespace ImageSharp.Processing.Processors
             this.Value = color;
             this.options = options;
         }
+
+        /// <summary>
+        /// Gets the Graphics options to alter how processor is applied.
+        /// </summary>
+        public GraphicsOptions GraphicsOptions => this.options;
 
         /// <summary>
         /// Gets the background color value.
@@ -77,10 +80,10 @@ namespace ImageSharp.Processing.Processors
                 Parallel.For(
                     minY,
                     maxY,
-                    this.ParallelOptions,
+                    source.Configuration.ParallelOptions,
                     y =>
                     {
-                        Span<TPixel> destination = source.GetRowSpan(y - startY).Slice(minX - startX, width);
+                        Span<TPixel> destination = source.GetPixelRowSpan(y - startY).Slice(minX - startX, width);
 
                         // This switched color & destination in the 2nd and 3rd places because we are applying the target colour under the current one
                         blender.Blend(destination, colors, destination, amount);

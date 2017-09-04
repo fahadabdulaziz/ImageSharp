@@ -1,19 +1,18 @@
-﻿// <copyright file="GifDecoderCore.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Formats
+using System;
+using System.Buffers;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Text;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.MetaData;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Primitives;
+
+namespace SixLabors.ImageSharp.Formats.Gif
 {
-    using System;
-    using System.Buffers;
-    using System.IO;
-    using System.Runtime.CompilerServices;
-    using System.Text;
-
-    using ImageSharp.PixelFormats;
-    using SixLabors.Primitives;
-
     /// <summary>
     /// Performs the gif decoding operation.
     /// </summary>
@@ -442,7 +441,7 @@ namespace ImageSharp.Formats
                     writeY = y;
                 }
 
-                Span<TPixel> rowSpan = image.GetRowSpan(writeY);
+                Span<TPixel> rowSpan = image.GetPixelRowSpan(writeY);
 
                 Rgba32 rgba = new Rgba32(0, 0, 0, 255);
 
@@ -523,7 +522,7 @@ namespace ImageSharp.Formats
         /// </summary>
         /// <param name="metaData">The meta data.</param>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetFrameMetaData(IMetaData metaData)
+        private void SetFrameMetaData(IFrameMetaData metaData)
         {
             if (this.graphicsControlExtension != null)
             {

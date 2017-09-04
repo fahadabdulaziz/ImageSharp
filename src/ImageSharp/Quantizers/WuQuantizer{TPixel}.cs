@@ -1,17 +1,17 @@
-﻿// <copyright file="WuQuantizer{TPixel}.cs" company="James Jackson-South">
-// Copyright (c) James Jackson-South and contributors.
+﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
-// </copyright>
 
-namespace ImageSharp.Quantizers
+using System;
+using System.Buffers;
+using System.Collections.Generic;
+using System.Numerics;
+using System.Runtime.CompilerServices;
+using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Quantizers.Base;
+
+namespace SixLabors.ImageSharp.Quantizers
 {
-    using System;
-    using System.Buffers;
-    using System.Collections.Generic;
-    using System.Numerics;
-    using System.Runtime.CompilerServices;
-    using ImageSharp.PixelFormats;
-
     /// <summary>
     /// An implementation of Wu's color quantizer with alpha channel.
     /// </summary>
@@ -32,7 +32,7 @@ namespace ImageSharp.Quantizers
     /// </para>
     /// </remarks>
     /// <typeparam name="TPixel">The pixel format.</typeparam>
-    public class WuQuantizer<TPixel> : Quantizer<TPixel>
+    public class WuQuantizer<TPixel> : QuantizerBase<TPixel>
         where TPixel : struct, IPixel<TPixel>
     {
         /// <summary>
@@ -252,7 +252,7 @@ namespace ImageSharp.Quantizers
 
             for (int y = 0; y < height; y++)
             {
-                Span<TPixel> row = source.GetRowSpan(y);
+                Span<TPixel> row = source.GetPixelRowSpan(y);
 
                 // And loop through each column
                 for (int x = 0; x < width; x++)
@@ -279,7 +279,7 @@ namespace ImageSharp.Quantizers
                     if (this.Dither)
                     {
                         // Apply the dithering matrix. We have to reapply the value now as the original has changed.
-                        this.DitherType.Dither(source, sourcePixel, transformedPixel, x, y, width, height, false);
+                        this.DitherType.Dither(source, sourcePixel, transformedPixel, x, y, 0, 0, width, height, false);
                     }
 
                     output[(y * source.Width) + x] = pixelValue;
