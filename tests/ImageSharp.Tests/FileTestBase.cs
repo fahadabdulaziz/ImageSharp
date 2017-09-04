@@ -8,7 +8,7 @@ namespace SixLabors.ImageSharp.Tests
     /// <summary>
     /// The test base class for reading and writing to files.
     /// </summary>
-    public abstract class FileTestBase : TestBase
+    public abstract class FileTestBase
     {
         /// <summary>
         /// TODO: We really should not depend on this! Let's use well defined, test-case specific inputs everywhere!
@@ -85,6 +85,7 @@ namespace SixLabors.ImageSharp.Tests
             // TestFile.Create(TestImages.Bmp.NegHeight), // Perf: Enable for local testing only
             // TestFile.Create(TestImages.Bmp.CoreHeader), // Perf: Enable for local testing only
                TestFile.Create(TestImages.Png.Splash),
+            // TestFile.Create(TestImages.Png.SnakeGame),
             // TestFile.Create(TestImages.Png.Cross), // Perf: Enable for local testing only
             // TestFile.Create(TestImages.Png.Bad.ChunkLength1), // Perf: Enable for local testing only
             // TestFile.Create(TestImages.Png.Bad.ChunkLength2), // Perf: Enable for local testing only

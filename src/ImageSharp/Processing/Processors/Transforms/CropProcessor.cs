@@ -3,6 +3,7 @@
 
 using System;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.Primitives;
@@ -51,7 +52,7 @@ namespace SixLabors.ImageSharp.Processing.Processors
                     source.Configuration.ParallelOptions,
                     y =>
                     {
-                        Span<TPixel> sourceRow = source.GetRowSpan(minX, y);
+                        Span<TPixel> sourceRow = source.GetPixelRowSpan(y).Slice(minX);
                         Span<TPixel> targetRow = targetPixels.GetRowSpan(y - minY);
                         SpanHelper.Copy(sourceRow, targetRow, maxX - minX);
                     });

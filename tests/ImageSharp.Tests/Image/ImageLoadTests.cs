@@ -7,6 +7,7 @@ using SixLabors.ImageSharp.Formats;
 using SixLabors.ImageSharp.IO;
 using Moq;
 using Xunit;
+using SixLabors.ImageSharp.Advanced;
 
 namespace SixLabors.ImageSharp.Tests
 {
@@ -317,6 +318,7 @@ namespace SixLabors.ImageSharp.Tests
             }
         }
 
+
         [Fact]
         public void LoadsImageWithoutThrowingCrcException()
         {
@@ -324,7 +326,7 @@ namespace SixLabors.ImageSharp.Tests
 
             using (Image<Rgba32> img = image1Provider.GetImage())
             {
-                Assert.Equal(166036, img.Pixels.Length);
+                Assert.Equal(166036, img.GetPixelSpan().Length);
             }
         }
 
