@@ -169,6 +169,15 @@ namespace SixLabors.ImageSharp
         }
 
         /// <summary>
+        /// Returns image as byte array
+        /// </summary>
+        /// <returns>byte[]</returns>
+        public byte[] GetBytes()
+        {
+            return this.Pixels.AsBytes().ToArray();
+        }
+
+        /// <summary>
         /// Locks the image providing access to the pixels.
         /// <remarks>
         /// It is imperative that the accessor is correctly disposed off after use.

@@ -6,6 +6,10 @@
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <Authors>Six Labors and contributors</Authors>
     <TargetFrameworks>netstandard1.3;netstandard1.1</TargetFrameworks>
+    <AssemblyTitle>ImageSharp</AssemblyTitle>
+    <VersionPrefix>1.0.0-alpha9</VersionPrefix>
+    <Authors>James Jackson-South and contributors</Authors>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>SixLabors.ImageSharp</AssemblyName>
@@ -41,6 +45,8 @@
     </PackageReference>
     <PackageReference Include="System.Buffers" Version="4.4.0" />
     <PackageReference Include="System.Memory" Version="4.4.0-preview2-25405-01" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
     <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
@@ -50,6 +56,8 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
@@ -59,6 +67,11 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
     </None>
+    <Reference Include="SixLabors.Core">
+      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
     <None Update="Formats\Jpeg\Components\Block8x8F.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>

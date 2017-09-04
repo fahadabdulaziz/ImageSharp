@@ -6,6 +6,10 @@
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <Authors>Six Labor and contributors</Authors>
     <TargetFramework>netstandard1.1</TargetFramework>
+    <AssemblyTitle>ImageSharp.Drawing</AssemblyTitle>
+    <VersionPrefix>1.0.0-alpha9</VersionPrefix>
+    <Authors>James Jackson-South and contributors</Authors>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>SixLabors.ImageSharp.Drawing</AssemblyName>
@@ -43,9 +47,25 @@
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SixLabors.Core">
+      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Fonts">
+      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Debug\netstandard2.0\SixLabors.Fonts.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Shapes">
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes\bin\Debug\netstandard2.0\SixLabors.Shapes.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Shapes.Text">
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.Text.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp.Drawing</RootNamespace>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
