@@ -5,7 +5,6 @@
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <Authors>Six Labors and contributors</Authors>
-    <TargetFrameworks>netstandard1.3;netstandard1.1</TargetFrameworks>
     <AssemblyTitle>ImageSharp</AssemblyTitle>
     <VersionPrefix>1.0.0-alpha9</VersionPrefix>
     <Authors>James Jackson-South and contributors</Authors>
@@ -38,7 +37,6 @@
     <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SixLabors.Core" Version="0.1.0-alpha0002" />
     <AdditionalFiles Include="..\..\stylecop.json" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>

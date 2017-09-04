@@ -5,7 +5,6 @@
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <Authors>Six Labor and contributors</Authors>
-    <TargetFramework>netstandard1.1</TargetFramework>
     <AssemblyTitle>ImageSharp.Drawing</AssemblyTitle>
     <VersionPrefix>1.0.0-alpha9</VersionPrefix>
     <Authors>James Jackson-South and contributors</Authors>
@@ -38,14 +37,12 @@
     <AdditionalFiles Include="..\..\stylecop.json" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ImageSharp\ImageSharp.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <PackageReference Include="SixLabors.Shapes.Text" Version="0.1.0-alpha0019" />
-    <PackageReference Include="SixLabors.Shapes" Version="0.1.0-alpha0019" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ImageSharp\ImageSharp.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SixLabors.Core">
@@ -55,7 +52,7 @@
       <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Debug\netstandard2.0\SixLabors.Fonts.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Shapes">
-      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes\bin\Debug\netstandard2.0\SixLabors.Shapes.dll</HintPath>
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Shapes.Text">
       <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.Text.dll</HintPath>

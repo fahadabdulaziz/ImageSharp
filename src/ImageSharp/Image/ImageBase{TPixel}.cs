@@ -167,16 +167,7 @@ namespace SixLabors.ImageSharp
             // from executing a second time.
             GC.SuppressFinalize(this);
         }
-
-        /// <summary>
-        /// Returns image as byte array
-        /// </summary>
-        /// <returns>byte[]</returns>
-        public byte[] GetBytes()
-        {
-            return this.Pixels.AsBytes().ToArray();
-        }
-
+        
         /// <summary>
         /// Locks the image providing access to the pixels.
         /// <remarks>
