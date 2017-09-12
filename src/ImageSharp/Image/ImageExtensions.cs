@@ -147,6 +147,12 @@ namespace SixLabors.ImageSharp
             byteBuffer.CopyTo(buffer);
         }
 
+        public static byte[] SavePixelData<TPixel>(this Image<TPixel> source)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            return source.GetPixelSpan().AsBytes().ToArray();
+        }
+
         /// <summary>
         /// Returns a Base64 encoded string from the given image.
         /// </summary>
