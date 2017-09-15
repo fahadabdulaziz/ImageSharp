@@ -40,9 +40,6 @@
     <ProjectReference Include="..\ImageSharp\ImageSharp.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SixLabors.Core" Version="1.0.0-beta0002" />
-    <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-beta0001" />
-    <PackageReference Include="SixLabors.Shapes" Version="1.0.0-beta0001" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
