@@ -8,8 +8,7 @@
     <AssemblyTitle>ImageSharp</AssemblyTitle>
     <VersionPrefix>1.0.0-alpha9</VersionPrefix>
     <Authors>James Jackson-South and contributors</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <TargetFrameworks>netstandard1.1;netstandard1.3</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>    
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>SixLabors.ImageSharp</AssemblyName>
@@ -38,7 +37,6 @@
     <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SixLabors.Core" Version="1.0.0-beta0003" />
     <AdditionalFiles Include="..\..\stylecop.json" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>
