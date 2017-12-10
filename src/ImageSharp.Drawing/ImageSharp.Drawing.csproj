@@ -36,13 +36,24 @@
     <ProjectReference Include="..\ImageSharp\ImageSharp.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="SixLabors.Core" Version="1.0.0-beta0004" />
-    <PackageReference Include="SixLabors.Shapes.Text" Version="1.0.0-beta0003" />
-    <PackageReference Include="SixLabors.Shapes" Version="1.0.0-beta0003" />
     <AdditionalFiles Include="..\..\stylecop.json" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="SixLabors.Core">
+      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Fonts">
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Fonts.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Shapes">
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Shapes.Text">
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.Text.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>

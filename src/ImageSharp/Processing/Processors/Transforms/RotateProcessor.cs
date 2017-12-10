@@ -60,7 +60,7 @@ namespace SixLabors.ImageSharp.Processing.Processors
 
                         for (int x = 0; x < width; x++)
                         {
-                            var transformedPoint = Point.Rotate(new Point(x, y), matrix);
+                            var transformedPoint = Point.Transform(new Point(x, y), matrix);
 
                             if (sourceBounds.Contains(transformedPoint.X, transformedPoint.Y))
                             {
