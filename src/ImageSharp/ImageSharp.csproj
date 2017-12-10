@@ -5,10 +5,7 @@
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <Authors>Six Labors and contributors</Authors>
-    <AssemblyTitle>ImageSharp</AssemblyTitle>
-    <VersionPrefix>1.0.0-alpha9</VersionPrefix>
-    <Authors>James Jackson-South and contributors</Authors>
-    <TargetFramework>netstandard2.0</TargetFramework>    
+    <TargetFramework>netstandard2.0</TargetFramework>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>SixLabors.ImageSharp</AssemblyName>
@@ -37,18 +34,19 @@
     <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="SixLabors.Core" Version="1.0.0-beta0004" />
     <AdditionalFiles Include="..\..\stylecop.json" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="System.Buffers" Version="4.4.0" />
     <PackageReference Include="System.Memory" Version="4.4.0-preview2-25405-01" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' OR '$(TargetFramework)' == 'netstandard1.3'">
     <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
+    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
   </ItemGroup>
   <PropertyGroup>
@@ -61,20 +59,73 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="SixLabors.Core">
-      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Update="BotasCore.snk">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>BotasCore.cs</LastGenOutput>
+    </None>
+    <None Update="Dithering\DHALF.TXT">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DHALF.cs</LastGenOutput>
+    </None>
+    <None Update="Dithering\DITHER.TXT">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>DITHER.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Bmp\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Gif\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Gif\spec-gif89a.txt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>spec-gif89a.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Jpeg\5116.DCT_Filter.pdf">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>5116.DCT_Filter.cs</LastGenOutput>
+    </None>
     <None Update="Formats\Jpeg\Common\Block8x8F.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
     </None>
-  </ItemGroup>
-  <ItemGroup>
     <None Update="Formats\Jpeg\Components\Block8x8F.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Jpeg\GolangPort\Components\Decoder\JpegScanDecoder.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>JpegScanDecoder.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Jpeg\itu-t81.pdf">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>itu-t81.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Jpeg\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Png\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
+    </None>
+    <None Update="Formats\Png\Zlib\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
+    </None>
+    <None Update="ImageSharp.netstandard1.1.v3.ncrunchproject">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ImageSharp.netstandard1.1.v3.cs</LastGenOutput>
+    </None>
+    <None Update="ImageSharp.pfx">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ImageSharp.cs</LastGenOutput>
+    </None>
+    <None Update="MetaData\Profiles\Exif\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
     </None>
     <None Update="PixelFormats\Generated\PixelOperations{TPixel}.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -92,11 +143,58 @@
       <LastGenOutput>DefaultPixelBlenders.Generated.cs</LastGenOutput>
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
+    <None Update="PixelFormats\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
+    </None>
+    <None Update="Processing\Processors\ColorMatrix\ColorBlindness\README.md">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>README.cs</LastGenOutput>
+    </None>
+    <None Update="public.pk">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>public.cs</LastGenOutput>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="BotasCore.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>BotasCore.snk</DependentUpon>
+    </Compile>
+    <Compile Update="Dithering\DHALF.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DHALF.TXT</DependentUpon>
+    </Compile>
+    <Compile Update="Dithering\DITHER.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>DITHER.TXT</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Bmp\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Gif\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Gif\spec-gif89a.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>spec-gif89a.txt</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Jpeg\5116.DCT_Filter.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>5116.DCT_Filter.pdf</DependentUpon>
+    </Compile>
     <Compile Update="Formats\Jpeg\Common\Block8x8F.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -106,6 +204,46 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>Block8x8F.Generated.tt</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Jpeg\GolangPort\Components\Decoder\JpegScanDecoder.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>JpegScanDecoder.md</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Jpeg\itu-t81.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>itu-t81.pdf</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Jpeg\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Png\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
+    </Compile>
+    <Compile Update="Formats\Png\Zlib\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
+    </Compile>
+    <Compile Update="ImageSharp.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ImageSharp.pfx</DependentUpon>
+    </Compile>
+    <Compile Update="ImageSharp.netstandard1.1.v3.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ImageSharp.netstandard1.1.v3.ncrunchproject</DependentUpon>
+    </Compile>
+    <Compile Update="MetaData\Profiles\Exif\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
     </Compile>
     <Compile Update="PixelFormats\Generated\PixelOperations{TPixel}.Generated.cs">
       <DesignTime>True</DesignTime>
@@ -127,123 +265,20 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>PorterDuffFunctions.Generated.tt</DependentUpon>
     </Compile>
+    <Compile Update="PixelFormats\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
+    </Compile>
+    <Compile Update="Processing\Processors\ColorMatrix\ColorBlindness\README.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>README.md</DependentUpon>
+    </Compile>
+    <Compile Update="public.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>public.pk</DependentUpon>
+    </Compile>
   </ItemGroup>
-    <PropertyGroup>
-        <Description>A cross-platform library for the processing of image files; written in C#</Description>
-        <AssemblyTitle>SixLabors.ImageSharp</AssemblyTitle>
-        <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
-        <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
-        <Authors>Six Labors and contributors</Authors>
-        <TargetFrameworks>netstandard1.1;netstandard1.3;netstandard2.0</TargetFrameworks>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <AssemblyName>SixLabors.ImageSharp</AssemblyName>
-        <PackageId>SixLabors.ImageSharp</PackageId>
-        <PackageTags>Image Resize Crop Gif Jpg Jpeg Bitmap Png Core</PackageTags>
-        <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/ImageSharp/master/build/icons/imagesharp-logo-128.png</PackageIconUrl>
-        <PackageProjectUrl>https://github.com/SixLabors/ImageSharp</PackageProjectUrl>
-        <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/SixLabors/ImageSharp</RepositoryUrl>
-        <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-        <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-        <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-        <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-        <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-        <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
-        <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-        <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-        <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
-        <DebugType Condition="$(codecov) != ''">full</DebugType>
-        <DebugType Condition="$(codecov) == ''">portable</DebugType>
-        <DebugSymbols>True</DebugSymbols>
-        <Features>IOperation</Features>
-    </PropertyGroup>
-    <ItemGroup>
-        <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    </ItemGroup>
-    <ItemGroup>
-        <PackageReference Include="SixLabors.Core" Version="1.0.0-beta0004" />
-        <AdditionalFiles Include="..\..\stylecop.json" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
-            <PrivateAssets>All</PrivateAssets>
-        </PackageReference>
-        <PackageReference Include="System.Buffers" Version="4.4.0" />
-        <PackageReference Include="System.Memory" Version="4.4.0-preview2-25405-01" />
-        <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
-    </ItemGroup>
-    <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' OR '$(TargetFramework)' == 'netstandard1.3'">
-        <PackageReference Include="System.IO.Compression" Version="4.3.0" />
-        <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
-        <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-        <PackageReference Include="System.ValueTuple" Version="4.4.0" />
-    </ItemGroup>
-    <PropertyGroup>
-        <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
-        <RootNamespace>SixLabors.ImageSharp</RootNamespace>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    </PropertyGroup>
-    <ItemGroup>
-        <None Update="Formats\Jpeg\Common\Block8x8F.Generated.tt">
-            <Generator>TextTemplatingFileGenerator</Generator>
-            <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
-        </None>
-        <None Update="Formats\Jpeg\Components\Block8x8F.Generated.tt">
-            <Generator>TextTemplatingFileGenerator</Generator>
-            <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
-        </None>
-        <None Update="PixelFormats\Generated\PixelOperations{TPixel}.Generated.tt">
-            <Generator>TextTemplatingFileGenerator</Generator>
-            <LastGenOutput>PixelOperations{TPixel}.Generated.cs</LastGenOutput>
-        </None>
-        <None Update="PixelFormats\Generated\Rgba32.PixelOperations.Generated.tt">
-            <Generator>TextTemplatingFileGenerator</Generator>
-            <LastGenOutput>Rgba32.PixelOperations.Generated.cs</LastGenOutput>
-        </None>
-        <None Update="PixelFormats\PixelBlenders\PorterDuffFunctions.Generated.tt">
-            <LastGenOutput>PorterDuffFunctions.Generated.cs</LastGenOutput>
-            <Generator>TextTemplatingFileGenerator</Generator>
-        </None>
-        <None Update="PixelFormats\PixelBlenders\DefaultPixelBlenders.Generated.tt">
-            <LastGenOutput>DefaultPixelBlenders.Generated.cs</LastGenOutput>
-            <Generator>TextTemplatingFileGenerator</Generator>
-        </None>
-    </ItemGroup>
-    <ItemGroup>
-        <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
-    </ItemGroup>
-    <ItemGroup>
-        <Compile Update="Formats\Jpeg\Common\Block8x8F.Generated.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Block8x8F.Generated.tt</DependentUpon>
-        </Compile>
-        <Compile Update="Formats\Jpeg\Components\Block8x8F.Generated.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Block8x8F.Generated.tt</DependentUpon>
-        </Compile>
-        <Compile Update="PixelFormats\Generated\PixelOperations{TPixel}.Generated.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>PixelOperations{TPixel}.Generated.tt</DependentUpon>
-        </Compile>
-        <Compile Update="PixelFormats\Generated\Rgba32.PixelOperations.Generated.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>Rgba32.PixelOperations.Generated.tt</DependentUpon>
-        </Compile>
-        <Compile Update="PixelFormats\PixelBlenders\DefaultPixelBlenders.Generated.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>DefaultPixelBlenders.Generated.tt</DependentUpon>
-        </Compile>
-        <Compile Update="PixelFormats\PixelBlenders\PorterDuffFunctions.Generated.cs">
-            <DesignTime>True</DesignTime>
-            <AutoGen>True</AutoGen>
-            <DependentUpon>PorterDuffFunctions.Generated.tt</DependentUpon>
-        </Compile>
-    </ItemGroup>
 </Project>
