@@ -60,32 +60,25 @@
   </PropertyGroup>
   <ItemGroup>
     <None Update="BotasCore.snk">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>BotasCore.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Dithering\DHALF.TXT">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>DHALF.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Dithering\DITHER.TXT">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>DITHER.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Bmp\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Gif\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Gif\spec-gif89a.txt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>spec-gif89a.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Jpeg\5116.DCT_Filter.pdf">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>5116.DCT_Filter.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Jpeg\Common\Block8x8F.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -96,36 +89,26 @@
       <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
     </None>
     <None Update="Formats\Jpeg\GolangPort\Components\Decoder\JpegScanDecoder.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>JpegScanDecoder.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Jpeg\itu-t81.pdf">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>itu-t81.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Jpeg\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Png\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Formats\Png\Zlib\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="ImageSharp.netstandard1.1.v3.ncrunchproject">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>ImageSharp.netstandard1.1.v3.cs</LastGenOutput>
     </None>
-    <None Update="ImageSharp.pfx">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ImageSharp.cs</LastGenOutput>
-    </None>
     <None Update="MetaData\Profiles\Exif\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="PixelFormats\Generated\PixelOperations{TPixel}.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -144,57 +127,16 @@
       <Generator>TextTemplatingFileGenerator</Generator>
     </None>
     <None Update="PixelFormats\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
     <None Update="Processing\Processors\ColorMatrix\ColorBlindness\README.md">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>README.cs</LastGenOutput>
-    </None>
-    <None Update="public.pk">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>public.cs</LastGenOutput>
+      <Generator></Generator>
     </None>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="BotasCore.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>BotasCore.snk</DependentUpon>
-    </Compile>
-    <Compile Update="Dithering\DHALF.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DHALF.TXT</DependentUpon>
-    </Compile>
-    <Compile Update="Dithering\DITHER.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>DITHER.TXT</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Bmp\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Gif\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Gif\spec-gif89a.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>spec-gif89a.txt</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Jpeg\5116.DCT_Filter.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>5116.DCT_Filter.pdf</DependentUpon>
-    </Compile>
     <Compile Update="Formats\Jpeg\Common\Block8x8F.Generated.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
@@ -205,45 +147,10 @@
       <AutoGen>True</AutoGen>
       <DependentUpon>Block8x8F.Generated.tt</DependentUpon>
     </Compile>
-    <Compile Update="Formats\Jpeg\GolangPort\Components\Decoder\JpegScanDecoder.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>JpegScanDecoder.md</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Jpeg\itu-t81.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>itu-t81.pdf</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Jpeg\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Png\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
-    </Compile>
-    <Compile Update="Formats\Png\Zlib\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
-    </Compile>
-    <Compile Update="ImageSharp.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>ImageSharp.pfx</DependentUpon>
-    </Compile>
     <Compile Update="ImageSharp.netstandard1.1.v3.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>ImageSharp.netstandard1.1.v3.ncrunchproject</DependentUpon>
-    </Compile>
-    <Compile Update="MetaData\Profiles\Exif\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
     </Compile>
     <Compile Update="PixelFormats\Generated\PixelOperations{TPixel}.Generated.cs">
       <DesignTime>True</DesignTime>
@@ -264,21 +171,6 @@
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>
       <DependentUpon>PorterDuffFunctions.Generated.tt</DependentUpon>
-    </Compile>
-    <Compile Update="PixelFormats\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
-    </Compile>
-    <Compile Update="Processing\Processors\ColorMatrix\ColorBlindness\README.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>README.md</DependentUpon>
-    </Compile>
-    <Compile Update="public.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>public.pk</DependentUpon>
     </Compile>
   </ItemGroup>
 </Project>
