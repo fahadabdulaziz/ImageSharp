@@ -26,7 +26,7 @@ namespace SixLabors.ImageSharp
         public static IImageProcessingContext<TPixel> Draw<TPixel>(this IImageProcessingContext<TPixel> source, IPen<TPixel> pen, RectangleF shape, GraphicsOptions options)
            where TPixel : struct, IPixel<TPixel>
         {
-            return source.Draw(pen, new SixLabors.Shapes.RectangularePolygon(shape.X, shape.Y, shape.Width, shape.Height), options);
+            return source.Draw(pen, new SixLabors.Shapes.RectangularPolygon(shape.X, shape.Y, shape.Width, shape.Height), options);
         }
 
         /// <summary>

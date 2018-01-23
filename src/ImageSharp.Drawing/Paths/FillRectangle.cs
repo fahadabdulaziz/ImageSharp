@@ -25,7 +25,7 @@ namespace SixLabors.ImageSharp
         public static IImageProcessingContext<TPixel> Fill<TPixel>(this IImageProcessingContext<TPixel> source, IBrush<TPixel> brush, RectangleF shape, GraphicsOptions options)
             where TPixel : struct, IPixel<TPixel>
         {
-            return source.Fill(brush, new SixLabors.Shapes.RectangularePolygon(shape.X, shape.Y, shape.Width, shape.Height), options);
+            return source.Fill(brush, new SixLabors.Shapes.RectangularPolygon(shape.X, shape.Y, shape.Width, shape.Height), options);
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace SixLabors.ImageSharp
         public static IImageProcessingContext<TPixel> Fill<TPixel>(this IImageProcessingContext<TPixel> source, IBrush<TPixel> brush, RectangleF shape)
             where TPixel : struct, IPixel<TPixel>
         {
-            return source.Fill(brush, new SixLabors.Shapes.RectangularePolygon(shape.X, shape.Y, shape.Width, shape.Height));
+            return source.Fill(brush, new SixLabors.Shapes.RectangularPolygon(shape.X, shape.Y, shape.Width, shape.Height));
         }
 
         /// <summary>
