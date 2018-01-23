@@ -6,6 +6,7 @@
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <Authors>Six Labors and contributors</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard1.1;netstandard1.3;netstandard2.0</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>SixLabors.ImageSharp</AssemblyName>
@@ -34,6 +35,7 @@
     <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="SixLabors.Core" Version="1.0.0-ci0005" />
     <AdditionalFiles Include="..\..\stylecop.json" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta004">
       <PrivateAssets>All</PrivateAssets>
@@ -48,6 +50,17 @@
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.4.0" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' OR '$(TargetFramework)' == 'netstandard1.3'">
+    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.4.0" />
+    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.4.0" />
+  </ItemGroup>
+  <PropertyGroup>
+    <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
+    <RootNamespace>SixLabors.ImageSharp</RootNamespace>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
