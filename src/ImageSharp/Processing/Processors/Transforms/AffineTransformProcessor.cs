@@ -51,8 +51,6 @@ namespace SixLabors.ImageSharp.Processing.Processors
         public AffineTransformProcessor(Matrix3x2 matrix, IResampler sampler, Size targetDimensions)
             : base(sampler)
         {
-            // Transforms are inverted else the output is the opposite of the expected.
-            Matrix3x2.Invert(matrix, out matrix);
             this.TransformMatrix = matrix;
             this.targetDimensions = targetDimensions;
         }
@@ -73,7 +71,7 @@ namespace SixLabors.ImageSharp.Processing.Processors
 
             // We will always be creating the clone even for mutate because we may need to resize the canvas
             IEnumerable<ImageFrame<TPixel>> frames =
-                source.Frames.Select(x => new ImageFrame<TPixel>(this.targetDimensions, x.MetaData.Clone()));
+                source.Frames.Select(x => new ImageFrame<TPixel>(source.GetMemoryManager(), this.targetDimensions, x.MetaData.Clone()));
 
             // Use the overload to prevent an extra frame being added
             return new Image<TPixel>(source.GetConfiguration(), source.MetaData.Clone(), frames);
@@ -94,6 +92,9 @@ namespace SixLabors.ImageSharp.Processing.Processors
 
             // Since could potentially be resizing the canvas we might need to re-calculate the matrix
             Matrix3x2 matrix = this.GetProcessingMatrix(sourceBounds, targetBounds);
+
+            // Convert from screen to world space.
+            Matrix3x2.Invert(matrix, out matrix);
 
             if (this.Sampler is NearestNeighborResampler)
             {
@@ -130,8 +131,10 @@ namespace SixLabors.ImageSharp.Processing.Processors
             int xLength = (int)MathF.Ceiling((radius.X * 2) + 2);
             int yLength = (int)MathF.Ceiling((radius.Y * 2) + 2);
 
-            using (var yBuffer = new Buffer2D<float>(yLength, height))
-            using (var xBuffer = new Buffer2D<float>(xLength, height))
+            MemoryManager memoryManager = configuration.MemoryManager;
+
+            using (Buffer2D<float> yBuffer = memoryManager.Allocate2D<float>(yLength, height))
+            using (Buffer2D<float> xBuffer = memoryManager.Allocate2D<float>(xLength, height))
             {
                 Parallel.For(
                     0,

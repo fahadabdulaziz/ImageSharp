@@ -23,6 +23,39 @@ namespace SixLabors.ImageSharp.Tests
     public static class TestImageExtensions
     {
         /// <summary>
+        /// TODO: This should be a common processing method! The image.Opacity(val) multiplies the alpha channel!
+        /// </summary>
+        /// <typeparam name="TPixel"></typeparam>
+        /// <param name="ctx"></param>
+        public static void MakeOpaque<TPixel>(this IImageProcessingContext<TPixel> ctx)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            MemoryManager memoryManager = ctx.MemoryManager;
+            ctx.Apply(
+                img =>
+                    {
+                        using (Buffer2D<Vector4> temp = memoryManager.Allocate2D<Vector4>(img.Width, img.Height))
+                        {
+                            Span<Vector4> tempSpan = temp.Span;
+                            foreach (ImageFrame<TPixel> frame in img.Frames)
+                            {
+                                Span<TPixel> pixelSpan = frame.GetPixelSpan();
+
+                                PixelOperations<TPixel>.Instance.ToVector4(pixelSpan, tempSpan, pixelSpan.Length);
+
+                                for (int i = 0; i < tempSpan.Length; i++)
+                                {
+                                    ref Vector4 v = ref tempSpan[i];
+                                    v.W = 1.0f;
+                                }
+
+                                PixelOperations<TPixel>.Instance.PackFromVector4(tempSpan, pixelSpan, pixelSpan.Length);
+                            }
+                        }
+                    });
+        }
+
+        /// <summary>
         /// Saves the image only when not running in the CI server.
         /// </summary>
         /// <typeparam name="TPixel">The pixel format</typeparam>
@@ -151,7 +184,7 @@ namespace SixLabors.ImageSharp.Tests
             bool appendPixelTypeToFileName = true)
             where TPixel : struct, IPixel<TPixel>
         {
-            using (Image<TPixel> firstFrameOnlyImage = new Image<TPixel>(image.Width, image.Height))
+            using (var firstFrameOnlyImage = new Image<TPixel>(image.Width, image.Height))
             using (Image<TPixel> referenceImage = GetReferenceOutputImage<TPixel>(
                 provider,
                 testOutputDetails,
@@ -221,7 +254,7 @@ namespace SixLabors.ImageSharp.Tests
                 testOutputDetails,
                 appendPixelTypeToFileName);
 
-            var temporalFrameImages = new List<Image<TPixel>>();
+            var temporaryFrameImages = new List<Image<TPixel>>();
 
             IImageDecoder decoder = TestEnvironment.GetReferenceDecoder(frameFiles[0]);
 
@@ -233,14 +266,14 @@ namespace SixLabors.ImageSharp.Tests
                 }
 
                 var tempImage = Image.Load<TPixel>(path, decoder);
-                temporalFrameImages.Add(tempImage);
+                temporaryFrameImages.Add(tempImage);
             }
 
-            Image<TPixel> firstTemp = temporalFrameImages[0];
+            Image<TPixel> firstTemp = temporaryFrameImages[0];
             
             var result = new Image<TPixel>(firstTemp.Width, firstTemp.Height);
 
-            foreach (Image<TPixel> fi in temporalFrameImages)
+            foreach (Image<TPixel> fi in temporaryFrameImages)
             {
                 result.Frames.AddFrame(fi.Frames.RootFrame);
                 fi.Dispose();
@@ -357,18 +390,13 @@ namespace SixLabors.ImageSharp.Tests
                                                    )
             where TPixel : struct, IPixel<TPixel>
         {
+            string actualOutputFile = provider.Utility.SaveTestOutputFile(image, extension, encoder, testOutputDetails, appendPixelTypeToFileName);
+            IImageDecoder referenceDecoder = TestEnvironment.GetReferenceDecoder(actualOutputFile);
 
-            provider.Utility.SaveTestOutputFile(image, extension, encoder, testOutputDetails, appendPixelTypeToFileName);
-            
-            referenceImageExtension = referenceImageExtension ?? extension;
-            string referenceOutputFile = provider.Utility.GetReferenceOutputFileName(referenceImageExtension, testOutputDetails, appendPixelTypeToFileName);
-
-            IImageDecoder referenceDecoder = TestEnvironment.GetReferenceDecoder(referenceOutputFile);
-
-            using (var encodedImage = Image.Load<TPixel>(referenceOutputFile, referenceDecoder))
+            using (var actualImage = Image.Load<TPixel>(actualOutputFile, referenceDecoder))
             {
                 ImageComparer comparer = customComparer ?? ImageComparer.Exact;
-                comparer.CompareImagesOrFrames(image, encodedImage);
+                comparer.VerifySimilarity(actualImage, image);
             }
         }
 
@@ -378,9 +406,11 @@ namespace SixLabors.ImageSharp.Tests
 
             Span<Rgba32> pixels = image.Frames.RootFrame.GetPixelSpan();
 
-            for (int i = 0; i < buffer.Length; i++)
+            Span<float> bufferSpan = buffer.Span;
+
+            for (int i = 0; i < bufferSpan.Length; i++)
             {
-                float value = buffer[i] * scale;
+                float value = bufferSpan[i] * scale;
                 var v = new Vector4(value, value, value, 1f);
                 pixels[i].PackFromVector4(v);
             }
