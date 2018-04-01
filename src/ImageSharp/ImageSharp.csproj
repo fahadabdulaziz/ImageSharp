@@ -11,7 +11,7 @@
     <AssemblyName>SixLabors.ImageSharp</AssemblyName>
     <PackageId>SixLabors.ImageSharp</PackageId>
     <PackageTags>Image Resize Crop Gif Jpg Jpeg Bitmap Png Core</PackageTags>
-    <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/ImageSharp/master/build/icons/imagesharp-logo-128.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/Branding/master/icons/imagesharp/sixlabors.imagesharp.128.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/SixLabors/ImageSharp</PackageProjectUrl>
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
@@ -35,6 +35,7 @@
     <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="SixLabors.Core" Version="1.0.0-beta0005" />
     <AdditionalFiles Include="..\..\stylecop.json" />
     <PackageReference Include="System.Buffers" Version="4.5.0-preview1-26216-02" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0-preview1-26216-02" />
