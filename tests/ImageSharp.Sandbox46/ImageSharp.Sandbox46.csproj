@@ -13,6 +13,7 @@
     <RootNamespace>SixLabors.ImageSharp.Sandbox46</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
+    <LangVersion>7.2</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ImageSharp.Drawing\ImageSharp.Drawing.csproj" />
@@ -24,6 +25,7 @@
     <PackageReference Include="Moq" Version="4.7.127" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="Moq" Version="4.8.1" />
+    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0-preview2-26406-04" />
     <!--<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />-->
     <!--<PackageReference Include="xunit.runner.visualstudio" Version="2.2.0" />-->
   </ItemGroup>
