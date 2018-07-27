@@ -14,10 +14,8 @@ namespace SixLabors.ImageSharp.ColorSpaces.Conversion.Implementation.HsvColorSap
     {
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Rgb Convert(Hsv input)
+        public Rgb Convert(in Hsv input)
         {
-            DebugGuard.NotNull(input, nameof(input));
-
             float s = input.S;
             float v = input.V;
 
@@ -79,10 +77,8 @@ namespace SixLabors.ImageSharp.ColorSpaces.Conversion.Implementation.HsvColorSap
 
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public Hsv Convert(Rgb input)
+        public Hsv Convert(in Rgb input)
         {
-            DebugGuard.NotNull(input, nameof(input));
-
             float r = input.R;
             float g = input.G;
             float b = input.B;

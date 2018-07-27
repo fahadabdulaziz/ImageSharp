@@ -3,6 +3,8 @@
 
 // ReSharper disable InconsistentNaming
 
+using System.Buffers;
+
 using SixLabors.ImageSharp.PixelFormats;
 
 namespace SixLabors.ImageSharp.Tests.Memory
@@ -12,7 +14,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
     using System.Runtime.CompilerServices;
     using System.Runtime.InteropServices;
 
-    using SixLabors.ImageSharp.Memory;
+    using SixLabors.Memory;
 
     using Xunit;
 
@@ -22,7 +24,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
 
         private const int PoolSelectorThresholdInBytes = MaxPooledBufferSizeInBytes / 2;
 
-        private MemoryManager MemoryManager { get; set; } = new ArrayPoolMemoryManager(MaxPooledBufferSizeInBytes, PoolSelectorThresholdInBytes);
+        private MemoryAllocator MemoryAllocator { get; set; } = new ArrayPoolMemoryAllocator(MaxPooledBufferSizeInBytes, PoolSelectorThresholdInBytes);
         
         /// <summary>
         /// Rent a buffer -> return it -> re-rent -> verify if it's span points to the previous location
@@ -30,12 +32,12 @@ namespace SixLabors.ImageSharp.Tests.Memory
         private bool CheckIsRentingPooledBuffer<T>(int length)
             where T : struct
         {
-            IBuffer<T> buffer = this.MemoryManager.Allocate<T>(length);
-            ref T ptrToPrevPosition0 = ref buffer.DangerousGetPinnableReference();
+            IMemoryOwner<T> buffer = this.MemoryAllocator.Allocate<T>(length);
+            ref T ptrToPrevPosition0 = ref buffer.GetReference();
             buffer.Dispose();
             
-            buffer = this.MemoryManager.Allocate<T>(length);
-            bool sameBuffers = Unsafe.AreSame(ref ptrToPrevPosition0, ref buffer.DangerousGetPinnableReference());
+            buffer = this.MemoryAllocator.Allocate<T>(length);
+            bool sameBuffers = Unsafe.AreSame(ref ptrToPrevPosition0, ref buffer.GetReference());
             buffer.Dispose();
 
             return sameBuffers;
@@ -44,7 +46,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
         public class BufferTests : BufferTestSuite
         {
             public BufferTests()
-                : base(new ArrayPoolMemoryManager(MaxPooledBufferSizeInBytes, PoolSelectorThresholdInBytes))
+                : base(new ArrayPoolMemoryAllocator(MaxPooledBufferSizeInBytes, PoolSelectorThresholdInBytes))
             {
             }
         }
@@ -54,7 +56,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
             [Fact]
             public void WhenBothParametersPassedByUser()
             {
-                var mgr = new ArrayPoolMemoryManager(1111, 666);
+                var mgr = new ArrayPoolMemoryAllocator(1111, 666);
                 Assert.Equal(1111, mgr.MaxPoolSizeInBytes);
                 Assert.Equal(666, mgr.PoolSelectorThresholdInBytes);
             }
@@ -62,7 +64,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
             [Fact]
             public void WhenPassedOnly_MaxPooledBufferSizeInBytes_SmallerThresholdValueIsAutoCalculated()
             {
-                var mgr = new ArrayPoolMemoryManager(5000);
+                var mgr = new ArrayPoolMemoryAllocator(5000);
                 Assert.Equal(5000, mgr.MaxPoolSizeInBytes);
                 Assert.True(mgr.PoolSelectorThresholdInBytes < mgr.MaxPoolSizeInBytes);
             }
@@ -70,7 +72,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
             [Fact]
             public void When_PoolSelectorThresholdInBytes_IsGreaterThan_MaxPooledBufferSizeInBytes_ExceptionIsThrown()
             {
-                Assert.ThrowsAny<Exception>(() => { new ArrayPoolMemoryManager(100, 200); });
+                Assert.ThrowsAny<Exception>(() => { new ArrayPoolMemoryAllocator(100, 200); });
             }
         }
 
@@ -126,19 +128,19 @@ namespace SixLabors.ImageSharp.Tests.Memory
         }
 
         [Theory]
-        [InlineData(false)]
-        [InlineData(true)]
-        public void CleaningRequests_AreControlledByAllocationParameter_Clean(bool clean)
+        [InlineData(AllocationOptions.None)]
+        [InlineData(AllocationOptions.Clean)]
+        public void CleaningRequests_AreControlledByAllocationParameter_Clean(AllocationOptions options)
         {
-            using (IBuffer<int> firstAlloc = this.MemoryManager.Allocate<int>(42))
+            using (IMemoryOwner<int> firstAlloc = this.MemoryAllocator.Allocate<int>(42))
             {
-                firstAlloc.Span.Fill(666);
+                firstAlloc.GetSpan().Fill(666);
             }
 
-            using (IBuffer<int> secondAlloc = this.MemoryManager.Allocate<int>(42, clean))
+            using (IMemoryOwner<int> secondAlloc = this.MemoryAllocator.Allocate<int>(42, options))
             {
-                int expected = clean ? 0 : 666;
-                Assert.Equal(expected, secondAlloc.Span[0]);
+                int expected = options == AllocationOptions.Clean ? 0 : 666;
+                Assert.Equal(expected, secondAlloc.GetSpan()[0]);
             }
         }
 
@@ -147,26 +149,26 @@ namespace SixLabors.ImageSharp.Tests.Memory
         [InlineData(true)]
         public void ReleaseRetainedResources_ReplacesInnerArrayPool(bool keepBufferAlive)
         {
-            IBuffer<int> buffer = this.MemoryManager.Allocate<int>(32);
-            ref int ptrToPrev0 = ref MemoryMarshal.GetReference(buffer.Span);
+            IMemoryOwner<int> buffer = this.MemoryAllocator.Allocate<int>(32);
+            ref int ptrToPrev0 = ref MemoryMarshal.GetReference(buffer.GetSpan());
 
             if (!keepBufferAlive)
             {
                 buffer.Dispose();
             }
 
-            this.MemoryManager.ReleaseRetainedResources();
+            this.MemoryAllocator.ReleaseRetainedResources();
             
-            buffer = this.MemoryManager.Allocate<int>(32);
+            buffer = this.MemoryAllocator.Allocate<int>(32);
 
-            Assert.False(Unsafe.AreSame(ref ptrToPrev0, ref buffer.DangerousGetPinnableReference()));
+            Assert.False(Unsafe.AreSame(ref ptrToPrev0, ref buffer.GetReference()));
         }
 
         [Fact]
         public void ReleaseRetainedResources_DisposingPreviouslyAllocatedBuffer_IsAllowed()
         {
-            IBuffer<int> buffer = this.MemoryManager.Allocate<int>(32);
-            this.MemoryManager.ReleaseRetainedResources();
+            IMemoryOwner<int> buffer = this.MemoryAllocator.Allocate<int>(32);
+            this.MemoryAllocator.ReleaseRetainedResources();
             buffer.Dispose();
         }
 
@@ -181,13 +183,13 @@ namespace SixLabors.ImageSharp.Tests.Memory
 
             int arrayLengthThreshold = PoolSelectorThresholdInBytes / sizeof(int);
 
-            IBuffer<int> small = this.MemoryManager.Allocate<int>(arrayLengthThreshold - 1);
-            ref int ptr2Small = ref small.DangerousGetPinnableReference();
+            IMemoryOwner<int> small = this.MemoryAllocator.Allocate<int>(arrayLengthThreshold - 1);
+            ref int ptr2Small = ref small.GetReference();
             small.Dispose();
 
-            IBuffer<int> large = this.MemoryManager.Allocate<int>(arrayLengthThreshold + 1);
+            IMemoryOwner<int> large = this.MemoryAllocator.Allocate<int>(arrayLengthThreshold + 1);
             
-            Assert.False(Unsafe.AreSame(ref ptr2Small, ref large.DangerousGetPinnableReference()));
+            Assert.False(Unsafe.AreSame(ref ptr2Small, ref large.GetReference()));
         }
 
         [Fact]
@@ -199,7 +201,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
                 return;
             }
 
-            this.MemoryManager = ArrayPoolMemoryManager.CreateWithAggressivePooling();
+            this.MemoryAllocator = ArrayPoolMemoryAllocator.CreateWithAggressivePooling();
 
             Assert.True(this.CheckIsRentingPooledBuffer<Rgba32>(4096 * 4096));
         }
@@ -213,7 +215,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
                 return;
             }
 
-            this.MemoryManager = ArrayPoolMemoryManager.CreateDefault();
+            this.MemoryAllocator = ArrayPoolMemoryAllocator.CreateDefault();
 
             Assert.False(this.CheckIsRentingPooledBuffer<Rgba32>(2 * 4096 * 4096));
             Assert.True(this.CheckIsRentingPooledBuffer<Rgba32>(2048 * 2048));
@@ -228,7 +230,7 @@ namespace SixLabors.ImageSharp.Tests.Memory
                 return;
             }
 
-            this.MemoryManager = ArrayPoolMemoryManager.CreateWithModeratePooling();
+            this.MemoryAllocator = ArrayPoolMemoryAllocator.CreateWithModeratePooling();
 
             Assert.False(this.CheckIsRentingPooledBuffer<Rgba32>(2048 * 2048));
             Assert.True(this.CheckIsRentingPooledBuffer<Rgba32>(1024 * 16));

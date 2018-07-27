@@ -2,7 +2,6 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Linq;
 using System.Text;
 
 namespace SixLabors.ImageSharp.MetaData.Profiles.Icc
@@ -83,22 +82,12 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Icc
                 return true;
             }
 
-            return base.Equals(other) && this.Data.SequenceEqual(other.Data) && this.IsAscii == other.IsAscii;
+            return base.Equals(other) && this.Data.AsSpan().SequenceEqual(other.Data) && this.IsAscii == other.IsAscii;
         }
 
         /// <inheritdoc/>
         public override bool Equals(object obj)
         {
-            if (obj == null)
-            {
-                return false;
-            }
-
-            if (ReferenceEquals(this, obj))
-            {
-                return true;
-            }
-
             return obj is IccDataTagDataEntry other && this.Equals(other);
         }
 

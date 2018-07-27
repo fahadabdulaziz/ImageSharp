@@ -19,7 +19,8 @@ namespace SixLabors.ImageSharp
         /// <param name="value">The target object, which cannot be null.</param>
         /// <param name="parameterName">The name of the parameter that is to be checked.</param>
         /// <exception cref="ArgumentNullException"><paramref name="value"/> is null</exception>
-        public static void NotNull(object value, string parameterName)
+        public static void NotNull<T>(T value, string parameterName)
+            where T : class
         {
             if (value == null)
             {
@@ -207,14 +208,14 @@ namespace SixLabors.ImageSharp
         }
 
         /// <summary>
-        /// Verifies, that the `source` span has the length of 'minSpan', or longer.
+        /// Verifies, that the `source` span has the length of 'minLength', or longer.
         /// </summary>
         /// <typeparam name="T">The element type of the spans</typeparam>
         /// <param name="source">The source span.</param>
         /// <param name="minLength">The minimum length.</param>
         /// <param name="parameterName">The name of the parameter that is to be checked.</param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="source"/> is true
+        /// <paramref name="source"/> has less than <paramref name="minLength"/> items
         /// </exception>
         public static void MustBeSizedAtLeast<T>(ReadOnlySpan<T> source, int minLength, string parameterName)
         {
@@ -225,14 +226,14 @@ namespace SixLabors.ImageSharp
         }
 
         /// <summary>
-        /// Verifies, that the `source` span has the length of 'minSpan', or longer.
+        /// Verifies, that the `source` span has the length of 'minLength', or longer.
         /// </summary>
         /// <typeparam name="T">The element type of the spans</typeparam>
         /// <param name="source">The target span.</param>
         /// <param name="minLength">The minimum length.</param>
         /// <param name="parameterName">The name of the parameter that is to be checked.</param>
         /// <exception cref="ArgumentException">
-        /// <paramref name="source"/> is true
+        /// <paramref name="source"/> has less than <paramref name="minLength"/> items
         /// </exception>
         public static void MustBeSizedAtLeast<T>(Span<T> source, int minLength, string parameterName)
         {

@@ -7,9 +7,9 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.MetaData;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.Memory;
 using SixLabors.Primitives;
 
 namespace SixLabors.ImageSharp.Formats.Gif
@@ -87,7 +87,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
         /// </summary>
         public FrameDecodingMode DecodingMode { get; }
 
-        private MemoryManager MemoryManager => this.configuration.MemoryManager;
+        private MemoryAllocator MemoryAllocator => this.configuration.MemoryAllocator;
 
         /// <summary>
         /// Decodes the stream to the image.
@@ -293,7 +293,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
                     continue;
                 }
 
-                using (IManagedByteBuffer commentsBuffer = this.MemoryManager.AllocateManagedByteBuffer(length))
+                using (IManagedByteBuffer commentsBuffer = this.MemoryAllocator.AllocateManagedByteBuffer(length))
                 {
                     this.stream.Read(commentsBuffer.Array, 0, length);
                     string comments = this.TextEncoding.GetString(commentsBuffer.Array, 0, length);
@@ -321,15 +321,15 @@ namespace SixLabors.ImageSharp.Formats.Gif
                 if (imageDescriptor.LocalColorTableFlag)
                 {
                     int length = imageDescriptor.LocalColorTableSize * 3;
-                    localColorTable = this.configuration.MemoryManager.AllocateManagedByteBuffer(length, true);
+                    localColorTable = this.configuration.MemoryAllocator.AllocateManagedByteBuffer(length, AllocationOptions.Clean);
                     this.stream.Read(localColorTable.Array, 0, length);
                 }
 
-                indices = this.configuration.MemoryManager.AllocateManagedByteBuffer(imageDescriptor.Width * imageDescriptor.Height, true);
+                indices = this.configuration.MemoryAllocator.AllocateManagedByteBuffer(imageDescriptor.Width * imageDescriptor.Height, AllocationOptions.Clean);
 
-                this.ReadFrameIndices(imageDescriptor, indices.Span);
-                ReadOnlySpan<Rgb24> colorTable = MemoryMarshal.Cast<byte, Rgb24>((localColorTable ?? this.globalColorTable).Span);
-                this.ReadFrameColors(ref image, ref previousFrame, indices.Span, colorTable, imageDescriptor);
+                this.ReadFrameIndices(imageDescriptor, indices.GetSpan());
+                ReadOnlySpan<Rgb24> colorTable = MemoryMarshal.Cast<byte, Rgb24>((localColorTable ?? this.globalColorTable).GetSpan());
+                this.ReadFrameColors(ref image, ref previousFrame, indices.GetSpan(), colorTable, imageDescriptor);
 
                 // Skip any remaining blocks
                 this.Skip(0);
@@ -350,7 +350,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
         private void ReadFrameIndices(in GifImageDescriptor imageDescriptor, Span<byte> indices)
         {
             int dataSize = this.stream.ReadByte();
-            using (var lzwDecoder = new LzwDecoder(this.configuration.MemoryManager, this.stream))
+            using (var lzwDecoder = new LzwDecoder(this.configuration.MemoryAllocator, this.stream))
             {
                 lzwDecoder.DecodePixels(imageDescriptor.Width, imageDescriptor.Height, dataSize, indices);
             }
@@ -450,8 +450,8 @@ namespace SixLabors.ImageSharp.Formats.Gif
                 {
                     int index = Unsafe.Add(ref indicesRef, i);
 
-                    if (this.graphicsControlExtension.TransparencyFlag == false ||
-                        this.graphicsControlExtension.TransparencyIndex != index)
+                    if (!this.graphicsControlExtension.TransparencyFlag
+                        || this.graphicsControlExtension.TransparencyIndex != index)
                     {
                         ref TPixel pixel = ref Unsafe.Add(ref rowRef, x);
                         rgba.Rgb = colorTable[index];
@@ -516,19 +516,47 @@ namespace SixLabors.ImageSharp.Formats.Gif
         /// <param name="stream">The stream containing image data. </param>
         private void ReadLogicalScreenDescriptorAndGlobalColorTable(Stream stream)
         {
-            this.metaData = new ImageMetaData();
-
             this.stream = stream;
 
             // Skip the identifier
             this.stream.Skip(6);
             this.ReadLogicalScreenDescriptor();
 
+            var meta = new ImageMetaData();
+
+            // The Pixel Aspect Ratio is defined to be the quotient of the pixel's
+            // width over its height.  The value range in this field allows
+            // specification of the widest pixel of 4:1 to the tallest pixel of
+            // 1:4 in increments of 1/64th.
+            //
+            // Values :        0 -   No aspect ratio information is given.
+            //            1..255 -   Value used in the computation.
+            //
+            // Aspect Ratio = (Pixel Aspect Ratio + 15) / 64
+            if (this.logicalScreenDescriptor.PixelAspectRatio > 0)
+            {
+                meta.ResolutionUnits = PixelResolutionUnit.AspectRatio;
+                float ratio = (this.logicalScreenDescriptor.PixelAspectRatio + 15) / 64F;
+
+                if (ratio > 1)
+                {
+                    meta.HorizontalResolution = ratio;
+                    meta.VerticalResolution = 1;
+                }
+                else
+                {
+                    meta.VerticalResolution = 1 / ratio;
+                    meta.HorizontalResolution = 1;
+                }
+            }
+
+            this.metaData = meta;
+
             if (this.logicalScreenDescriptor.GlobalColorTableFlag)
             {
                 int globalColorTableLength = this.logicalScreenDescriptor.GlobalColorTableSize * 3;
 
-                this.globalColorTable = this.MemoryManager.AllocateManagedByteBuffer(globalColorTableLength, true);
+                this.globalColorTable = this.MemoryAllocator.AllocateManagedByteBuffer(globalColorTableLength, AllocationOptions.Clean);
 
                 // Read the global color table data from the stream
                 stream.Read(this.globalColorTable.Array, 0, globalColorTableLength);

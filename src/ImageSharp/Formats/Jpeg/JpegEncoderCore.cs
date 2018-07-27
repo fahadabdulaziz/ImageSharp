@@ -1,11 +1,14 @@
 ﻿// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
+using System;
+using System.Buffers.Binary;
 using System.IO;
 using System.Runtime.CompilerServices;
-
+using SixLabors.ImageSharp.Common.Helpers;
 using SixLabors.ImageSharp.Formats.Jpeg.Components;
 using SixLabors.ImageSharp.Formats.Jpeg.Components.Encoder;
+using SixLabors.ImageSharp.MetaData;
 using SixLabors.ImageSharp.MetaData.Profiles.Exif;
 using SixLabors.ImageSharp.MetaData.Profiles.Icc;
 using SixLabors.ImageSharp.PixelFormats;
@@ -209,7 +212,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
             int componentCount = 3;
 
             // Write the Start Of Image marker.
-            this.WriteApplicationHeader((short)image.MetaData.HorizontalResolution, (short)image.MetaData.VerticalResolution);
+            this.WriteApplicationHeader(image.MetaData);
 
             this.WriteProfiles(image);
 
@@ -424,9 +427,8 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// <summary>
         /// Writes the application header containing the JFIF identifier plus extra data.
         /// </summary>
-        /// <param name="horizontalResolution">The resolution of the image in the x- direction.</param>
-        /// <param name="verticalResolution">The resolution of the image in the y- direction.</param>
-        private void WriteApplicationHeader(short horizontalResolution, short verticalResolution)
+        /// <param name="meta">The image meta data.</param>
+        private void WriteApplicationHeader(ImageMetaData meta)
         {
             // Write the start of image marker. Markers are always prefixed with with 0xff.
             this.buffer[0] = JpegConstants.Markers.XFF;
@@ -444,13 +446,25 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
             this.buffer[10] = 0x00; // = "JFIF",'\0'
             this.buffer[11] = 0x01; // versionhi
             this.buffer[12] = 0x01; // versionlo
-            this.buffer[13] = 0x01; // xyunits as dpi
 
             // Resolution. Big Endian
-            this.buffer[14] = (byte)(horizontalResolution >> 8);
-            this.buffer[15] = (byte)horizontalResolution;
-            this.buffer[16] = (byte)(verticalResolution >> 8);
-            this.buffer[17] = (byte)verticalResolution;
+            Span<byte> hResolution = this.buffer.AsSpan(14, 2);
+            Span<byte> vResolution = this.buffer.AsSpan(16, 2);
+
+            if (meta.ResolutionUnits == PixelResolutionUnit.PixelsPerMeter)
+            {
+                // Scale down to PPI
+                this.buffer[13] = (byte)PixelResolutionUnit.PixelsPerInch; // xyunits
+                BinaryPrimitives.WriteInt16BigEndian(hResolution, (short)Math.Round(UnitConverter.MeterToInch(meta.HorizontalResolution)));
+                BinaryPrimitives.WriteInt16BigEndian(vResolution, (short)Math.Round(UnitConverter.MeterToInch(meta.VerticalResolution)));
+            }
+            else
+            {
+                // We can simply pass the value.
+                this.buffer[13] = (byte)meta.ResolutionUnits; // xyunits
+                BinaryPrimitives.WriteInt16BigEndian(hResolution, (short)Math.Round(meta.HorizontalResolution));
+                BinaryPrimitives.WriteInt16BigEndian(vResolution, (short)Math.Round(meta.VerticalResolution));
+            }
 
             // No thumbnail
             this.buffer[18] = 0x00; // Thumbnail width
@@ -543,15 +557,16 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
                 specs = new[] { HuffmanSpec.TheHuffmanSpecs[0], HuffmanSpec.TheHuffmanSpecs[1] };
             }
 
-            foreach (HuffmanSpec s in specs)
+            for (int i = 0; i < specs.Length; i++)
             {
+                ref HuffmanSpec s = ref specs[i];
                 markerlen += 1 + 16 + s.Values.Length;
             }
 
             this.WriteMarkerHeader(JpegConstants.Markers.DHT, markerlen);
             for (int i = 0; i < specs.Length; i++)
             {
-                HuffmanSpec spec = specs[i];
+                ref HuffmanSpec spec = ref specs[i];
                 int len = 0;
 
                 fixed (byte* huffman = this.huffmanBuffer)
@@ -736,16 +751,16 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         private void WriteStartOfFrame(int width, int height, int componentCount)
         {
             // "default" to 4:2:0
-            byte[] subsamples = { 0x22, 0x11, 0x11 };
-            byte[] chroma = { 0x00, 0x01, 0x01 };
+            Span<byte> subsamples = stackalloc byte[] { 0x22, 0x11, 0x11 };
+            Span<byte> chroma = stackalloc byte[] { 0x00, 0x01, 0x01 };
 
             switch (this.subsample)
             {
                 case JpegSubsample.Ratio444:
-                    subsamples = new byte[] { 0x11, 0x11, 0x11 };
+                    subsamples = stackalloc byte[] { 0x11, 0x11, 0x11 };
                     break;
                 case JpegSubsample.Ratio420:
-                    subsamples = new byte[] { 0x22, 0x11, 0x11 };
+                    subsamples = stackalloc byte[] { 0x22, 0x11, 0x11 };
                     break;
             }
 
