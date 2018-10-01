@@ -25,7 +25,6 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
         private Endianness endianness = Endianness.BigEndian;
         private uint exifOffset;
         private uint gpsOffset;
-        private int startIndex;
 
         public ExifReader(byte[] exifData)
         {
@@ -77,21 +76,8 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
         {
             var values = new List<ExifValue>();
 
-            if (this.ReadString(4) == "Exif")
-            {
-                if (this.ReadUInt16() != 0)
-                {
-                    return values;
-                }
-
-                this.startIndex = 6;
-            }
-            else
-            {
-                this.position = 0;
-            }
-
-            if (this.ReadString(2) == "II")
+            // II == 0x4949
+            if (this.ReadUInt16() == 0x4949)
             {
                 this.endianness = Endianness.LittleEndian;
             }
@@ -102,19 +88,19 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
             }
 
             uint ifdOffset = this.ReadUInt32();
-            this.AddValues(values, (int)ifdOffset);
+            this.AddValues(values, ifdOffset);
 
             uint thumbnailOffset = this.ReadUInt32();
-            this.GetThumbnail((int)thumbnailOffset);
+            this.GetThumbnail(thumbnailOffset);
 
             if (this.exifOffset != 0)
             {
-                this.AddValues(values, (int)this.exifOffset);
+                this.AddValues(values, this.exifOffset);
             }
 
             if (this.gpsOffset != 0)
             {
-                this.AddValues(values, (int)this.gpsOffset);
+                this.AddValues(values, this.gpsOffset);
             }
 
             return values;
@@ -167,9 +153,14 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
         /// </summary>
         /// <param name="values">The values.</param>
         /// <param name="index">The index.</param>
-        private void AddValues(List<ExifValue> values, int index)
+        private void AddValues(List<ExifValue> values, uint index)
         {
-            this.position = this.startIndex + index;
+            if (index > (uint)this.exifData.Length)
+            {
+                return;
+            }
+
+            this.position = (int)index;
             int count = this.ReadUInt16();
 
             for (int i = 0; i < count; i++)
@@ -217,7 +208,7 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
 
         private object ConvertValue(ExifDataType dataType, ReadOnlySpan<byte> buffer, uint numberOfComponents)
         {
-            if (buffer == null || buffer.Length == 0)
+            if (buffer.Length == 0)
             {
                 return null;
             }
@@ -353,7 +344,7 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
             {
                 int oldIndex = this.position;
 
-                uint newIndex = this.ConvertToUInt32(offsetBuffer) + (uint)this.startIndex;
+                uint newIndex = this.ConvertToUInt32(offsetBuffer);
 
                 // Ensure that the new index does not overrun the data
                 if (newIndex > int.MaxValue)
@@ -445,7 +436,7 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
             return null;
         }
 
-        private void GetThumbnail(int offset)
+        private void GetThumbnail(uint offset)
         {
             var values = new List<ExifValue>();
             this.AddValues(values, offset);
@@ -454,7 +445,7 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
             {
                 if (value.Tag == ExifTag.JPEGInterchangeFormat && (value.DataType == ExifDataType.Long))
                 {
-                    this.ThumbnailOffset = (uint)value.Value + (uint)this.startIndex;
+                    this.ThumbnailOffset = (uint)value.Value;
                 }
                 else if (value.Tag == ExifTag.JPEGInterchangeFormatLength && value.DataType == ExifDataType.Long)
                 {
@@ -529,10 +520,7 @@ namespace SixLabors.ImageSharp.MetaData.Profiles.Exif
             return new Rational(numerator, denominator, false);
         }
 
-        private sbyte ConvertToSignedByte(ReadOnlySpan<byte> buffer)
-        {
-            return unchecked((sbyte)buffer[0]);
-        }
+        private sbyte ConvertToSignedByte(ReadOnlySpan<byte> buffer) => unchecked((sbyte)buffer[0]);
 
         private int ConvertToInt32(ReadOnlySpan<byte> buffer) // SignedLong in Exif Specification
         {

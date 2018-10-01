@@ -5,6 +5,8 @@ using System;
 using System.Buffers;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.ParallelUtils;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.Memory;
 using SixLabors.Primitives;
@@ -51,17 +53,23 @@ namespace SixLabors.ImageSharp.Processing.Processors.Drawing
 
             int width = maxX - minX;
 
+            var workingRect = Rectangle.FromLTRB(minX, minY, maxX, maxY);
+
             // If there's no reason for blending, then avoid it.
             if (this.IsSolidBrushWithoutBlending(out SolidBrush<TPixel> solidBrush))
             {
-                Parallel.For(
-                    minY,
-                    maxY,
-                    configuration.ParallelOptions,
-                    y =>
-                    {
-                        source.GetPixelRowSpan(y).Slice(minX, width).Fill(solidBrush.Color);
-                    });
+                ParallelExecutionSettings parallelSettings = configuration.GetParallelSettings().MultiplyMinimumPixelsPerTask(4);
+
+                ParallelHelper.IterateRows(
+                    workingRect,
+                    parallelSettings,
+                    rows =>
+                        {
+                            for (int y = rows.Min; y < rows.Max; y++)
+                            {
+                                source.GetPixelRowSpan(y).Slice(minX, width).Fill(solidBrush.Color);
+                            }
+                        });
             }
             else
             {
@@ -84,16 +92,18 @@ namespace SixLabors.ImageSharp.Processing.Processors.Drawing
                 {
                     amount.GetSpan().Fill(1f);
 
-                    Parallel.For(
-                        minY,
-                        maxY,
-                        configuration.ParallelOptions,
-                        y =>
+                    ParallelHelper.IterateRows(
+                        workingRect,
+                        configuration,
+                        rows =>
                             {
-                                int offsetY = y - startY;
-                                int offsetX = minX - startX;
+                                for (int y = rows.Min; y < rows.Max; y++)
+                                {
+                                    int offsetY = y - startY;
+                                    int offsetX = minX - startX;
 
-                                applicator.Apply(amount.GetSpan(), offsetX, offsetY);
+                                    applicator.Apply(amount.GetSpan(), offsetX, offsetY);
+                                }
                             });
                 }
             }
@@ -103,12 +113,12 @@ namespace SixLabors.ImageSharp.Processing.Processors.Drawing
         {
             solidBrush = this.brush as SolidBrush<TPixel>;
 
-            return solidBrush != null
-                   && ((this.options.BlenderMode == PixelBlenderMode.Normal && this.options.BlendPercentage == 1f
-                                                                            && solidBrush.Color.ToVector4().W == 1f)
-                       || (this.options.BlenderMode == PixelBlenderMode.Over && this.options.BlendPercentage == 1f
-                                                                             && solidBrush.Color.ToVector4().W == 1f)
-                       || (this.options.BlenderMode == PixelBlenderMode.Src));
+            if (solidBrush == null)
+            {
+                return false;
+            }
+
+            return this.options.IsOpaqueColorWithoutBlending(solidBrush.Color);
         }
     }
 }

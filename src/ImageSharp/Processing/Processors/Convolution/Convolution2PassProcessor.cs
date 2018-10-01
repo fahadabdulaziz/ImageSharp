@@ -4,6 +4,9 @@
 using System;
 using System.Numerics;
 using System.Threading.Tasks;
+
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.ParallelUtils;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Primitives;
 using SixLabors.ImageSharp.Processing.Processors;
@@ -43,12 +46,10 @@ namespace SixLabors.ImageSharp.Processing.Processors.Convolution
         /// <inheritdoc/>
         protected override void OnFrameApply(ImageFrame<TPixel> source, Rectangle sourceRectangle, Configuration configuration)
         {
-            ParallelOptions parallelOptions = configuration.ParallelOptions;
-
             using (Buffer2D<TPixel> firstPassPixels = configuration.MemoryAllocator.Allocate2D<TPixel>(source.Size()))
             {
-                this.ApplyConvolution(firstPassPixels, source.PixelBuffer, source.Bounds(), this.KernelX, parallelOptions);
-                this.ApplyConvolution(source.PixelBuffer, firstPassPixels, sourceRectangle, this.KernelY, parallelOptions);
+                this.ApplyConvolution(firstPassPixels, source.PixelBuffer, source.Bounds(), this.KernelX, configuration);
+                this.ApplyConvolution(source.PixelBuffer, firstPassPixels, sourceRectangle, this.KernelY, configuration);
             }
         }
 
@@ -62,13 +63,13 @@ namespace SixLabors.ImageSharp.Processing.Processors.Convolution
         /// The <see cref="Rectangle"/> structure that specifies the portion of the image object to draw.
         /// </param>
         /// <param name="kernel">The kernel operator.</param>
-        /// <param name="parallelOptions">The parallel options</param>
+        /// <param name="configuration">The <see cref="Configuration"/></param>
         private void ApplyConvolution(
             Buffer2D<TPixel> targetPixels,
             Buffer2D<TPixel> sourcePixels,
             Rectangle sourceRectangle,
-            DenseMatrix<float> kernel,
-            ParallelOptions parallelOptions)
+            DenseMatrix<float> kernel, // TODO: Can't use 'in' as pass by ref to lambda expression.
+            Configuration configuration)
         {
             int kernelHeight = kernel.Rows;
             int kernelWidth = kernel.Columns;
@@ -82,43 +83,47 @@ namespace SixLabors.ImageSharp.Processing.Processors.Convolution
             int maxY = endY - 1;
             int maxX = endX - 1;
 
-            Parallel.For(
-                startY,
-                endY,
-                parallelOptions,
-                y =>
-                {
-                    Span<TPixel> targetRow = targetPixels.GetRowSpan(y);
+            var workingRectangle = Rectangle.FromLTRB(startX, startY, endX, endY);
 
-                    for (int x = startX; x < endX; x++)
+            ParallelHelper.IterateRows(
+                workingRectangle,
+                configuration,
+                rows =>
                     {
-                        Vector4 destination = default;
-
-                        // Apply each matrix multiplier to the color components for each pixel.
-                        for (int fy = 0; fy < kernelHeight; fy++)
+                        for (int y = rows.Min; y < rows.Max; y++)
                         {
-                            int fyr = fy - radiusY;
-                            int offsetY = y + fyr;
+                            Span<TPixel> targetRow = targetPixels.GetRowSpan(y);
 
-                            offsetY = offsetY.Clamp(0, maxY);
-                            Span<TPixel> row = sourcePixels.GetRowSpan(offsetY);
-
-                            for (int fx = 0; fx < kernelWidth; fx++)
+                            for (int x = startX; x < endX; x++)
                             {
-                                int fxr = fx - radiusX;
-                                int offsetX = x + fxr;
+                                Vector4 destination = default;
 
-                                offsetX = offsetX.Clamp(0, maxX);
+                                // Apply each matrix multiplier to the color components for each pixel.
+                                for (int fy = 0; fy < kernelHeight; fy++)
+                                {
+                                    int fyr = fy - radiusY;
+                                    int offsetY = y + fyr;
 
-                                Vector4 currentColor = row[offsetX].ToVector4().Premultiply();
-                                destination += kernel[fy, fx] * currentColor;
+                                    offsetY = offsetY.Clamp(0, maxY);
+                                    Span<TPixel> row = sourcePixels.GetRowSpan(offsetY);
+
+                                    for (int fx = 0; fx < kernelWidth; fx++)
+                                    {
+                                        int fxr = fx - radiusX;
+                                        int offsetX = x + fxr;
+
+                                        offsetX = offsetX.Clamp(0, maxX);
+
+                                        Vector4 currentColor = row[offsetX].ToVector4().Premultiply();
+                                        destination += kernel[fy, fx] * currentColor;
+                                    }
+                                }
+
+                                ref TPixel pixel = ref targetRow[x];
+                                pixel.PackFromVector4(destination.UnPremultiply());
                             }
                         }
-
-                        ref TPixel pixel = ref targetRow[x];
-                        pixel.PackFromVector4(destination.UnPremultiply());
-                    }
-                });
+                    });
         }
     }
 }

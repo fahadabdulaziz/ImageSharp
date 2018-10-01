@@ -4,9 +4,11 @@
 using System;
 using System.Buffers.Binary;
 using System.IO;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using SixLabors.ImageSharp.Common.Helpers;
 using SixLabors.ImageSharp.Formats.Jpeg.Components;
+using SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder;
 using SixLabors.ImageSharp.Formats.Jpeg.Components.Encoder;
 using SixLabors.ImageSharp.MetaData;
 using SixLabors.ImageSharp.MetaData.Profiles.Exif;
@@ -121,19 +123,14 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         private readonly byte[] huffmanBuffer = new byte[179];
 
         /// <summary>
-        /// Gets or sets a value indicating whether the metadata should be ignored when the image is being decoded.
+        /// Gets or sets the subsampling method to use.
         /// </summary>
-        private readonly bool ignoreMetadata;
+        private JpegSubsample? subsample;
 
         /// <summary>
         /// The quality, that will be used to encode the image.
         /// </summary>
-        private readonly int quality;
-
-        /// <summary>
-        /// Gets or sets the subsampling method to use.
-        /// </summary>
-        private readonly JpegSubsample? subsample;
+        private readonly int? quality;
 
         /// <summary>
         /// The accumulated bits to write to the stream.
@@ -166,11 +163,8 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// <param name="options">The options</param>
         public JpegEncoderCore(IJpegEncoderOptions options)
         {
-            // System.Drawing produces identical output for jpegs with a quality parameter of 0 and 1.
-            this.quality = options.Quality.Clamp(1, 100);
-            this.subsample = options.Subsample ?? (this.quality >= 91 ? JpegSubsample.Ratio444 : JpegSubsample.Ratio420);
-
-            this.ignoreMetadata = options.IgnoreMetadata;
+            this.quality = options.Quality;
+            this.subsample = options.Subsample;
         }
 
         /// <summary>
@@ -192,16 +186,21 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
             }
 
             this.outputStream = stream;
+            ImageMetaData metaData = image.MetaData;
+
+            // System.Drawing produces identical output for jpegs with a quality parameter of 0 and 1.
+            int qlty = (this.quality ?? metaData.GetFormatMetaData(JpegFormat.Instance).Quality).Clamp(1, 100);
+            this.subsample = this.subsample ?? (qlty >= 91 ? JpegSubsample.Ratio444 : JpegSubsample.Ratio420);
 
             // Convert from a quality rating to a scaling factor.
             int scale;
-            if (this.quality < 50)
+            if (qlty < 50)
             {
-                scale = 5000 / this.quality;
+                scale = 5000 / qlty;
             }
             else
             {
-                scale = 200 - (this.quality * 2);
+                scale = 200 - (qlty * 2);
             }
 
             // Initialize the quantization tables.
@@ -212,9 +211,10 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
             int componentCount = 3;
 
             // Write the Start Of Image marker.
-            this.WriteApplicationHeader(image.MetaData);
+            this.WriteApplicationHeader(metaData);
 
-            this.WriteProfiles(image);
+            // Write Exif and ICC profiles
+            this.WriteProfiles(metaData);
 
             // Write the quantization tables.
             this.WriteDefineQuantizationTables();
@@ -430,7 +430,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// <param name="meta">The image meta data.</param>
         private void WriteApplicationHeader(ImageMetaData meta)
         {
-            // Write the start of image marker. Markers are always prefixed with with 0xff.
+            // Write the start of image marker. Markers are always prefixed with 0xff.
             this.buffer[0] = JpegConstants.Markers.XFF;
             this.buffer[1] = JpegConstants.Markers.SOI;
 
@@ -547,7 +547,8 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         private void WriteDefineHuffmanTables(int componentCount)
         {
             // Table identifiers.
-            byte[] headers = { 0x00, 0x10, 0x01, 0x11 };
+            Span<byte> headers = stackalloc byte[] { 0x00, 0x10, 0x01, 0x11 };
+
             int markerlen = 2;
             HuffmanSpec[] specs = HuffmanSpec.TheHuffmanSpecs;
 
@@ -620,27 +621,64 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// </exception>
         private void WriteExifProfile(ExifProfile exifProfile)
         {
-            const int Max = 65533;
-            byte[] data = exifProfile?.ToByteArray();
-            if (data == null || data.Length == 0)
+            if (exifProfile is null)
             {
                 return;
             }
 
-            if (data.Length > Max)
+            const int MaxBytesApp1 = 65533;
+            const int MaxBytesWithExifId = 65527;
+
+            byte[] data = exifProfile?.ToByteArray();
+
+            if (data is null || data.Length == 0)
             {
-                throw new ImageFormatException($"Exif profile size exceeds limit. nameof{Max}");
+                return;
             }
 
-            int length = data.Length + 2;
+            data = ProfileResolver.ExifMarker.Concat(data).ToArray();
 
+            int remaining = data.Length;
+            int bytesToWrite = remaining > MaxBytesApp1 ? MaxBytesApp1 : remaining;
+            int app1Length = bytesToWrite + 2;
+
+            this.WriteApp1Header(app1Length);
+
+            // write the exif data
+            this.outputStream.Write(data, 0, bytesToWrite);
+            remaining -= bytesToWrite;
+
+            // if the exif data exceeds 64K, write it in multiple APP1 Markers
+            for (int idx = MaxBytesApp1; idx < data.Length; idx += MaxBytesWithExifId)
+            {
+                bytesToWrite = remaining > MaxBytesWithExifId ? MaxBytesWithExifId : remaining;
+                app1Length = bytesToWrite + 2 + 6;
+
+                this.WriteApp1Header(app1Length);
+
+                // write Exif00 marker
+                ProfileResolver.ExifMarker.AsSpan().CopyTo(this.buffer.AsSpan());
+                this.outputStream.Write(this.buffer, 0, 6);
+
+                // write the exif data
+                this.outputStream.Write(data, idx, bytesToWrite);
+
+                remaining -= bytesToWrite;
+            }
+        }
+
+        /// <summary>
+        /// Writes the App1 header.
+        /// </summary>
+        /// <param name="app1Length">The length of the data the app1 marker contains</param>
+        private void WriteApp1Header(int app1Length)
+        {
             this.buffer[0] = JpegConstants.Markers.XFF;
             this.buffer[1] = JpegConstants.Markers.APP1; // Application Marker
-            this.buffer[2] = (byte)((length >> 8) & 0xFF);
-            this.buffer[3] = (byte)(length & 0xFF);
+            this.buffer[2] = (byte)((app1Length >> 8) & 0xFF);
+            this.buffer[3] = (byte)(app1Length & 0xFF);
 
             this.outputStream.Write(this.buffer, 0, 4);
-            this.outputStream.Write(data, 0, data.Length);
         }
 
         /// <summary>
@@ -652,8 +690,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// </exception>
         private void WriteIccProfile(IccProfile iccProfile)
         {
-            // Just incase someone set the value to null by accident.
-            if (iccProfile == null)
+            if (iccProfile is null)
             {
                 return;
             }
@@ -664,7 +701,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
 
             byte[] data = iccProfile.ToByteArray();
 
-            if (data == null || data.Length == 0)
+            if (data is null || data.Length == 0)
             {
                 return;
             }
@@ -727,19 +764,17 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// <summary>
         /// Writes the metadata profiles to the image.
         /// </summary>
-        /// <param name="image">The image.</param>
-        /// <typeparam name="TPixel">The pixel format.</typeparam>
-        private void WriteProfiles<TPixel>(Image<TPixel> image)
-            where TPixel : struct, IPixel<TPixel>
+        /// <param name="metaData">The image meta data.</param>
+        private void WriteProfiles(ImageMetaData metaData)
         {
-            if (this.ignoreMetadata)
+            if (metaData is null)
             {
                 return;
             }
 
-            image.MetaData.SyncProfiles();
-            this.WriteExifProfile(image.MetaData.ExifProfile);
-            this.WriteIccProfile(image.MetaData.IccProfile);
+            metaData.SyncProfiles();
+            this.WriteExifProfile(metaData.ExifProfile);
+            this.WriteIccProfile(metaData.IccProfile);
         }
 
         /// <summary>
@@ -908,7 +943,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// <param name="length">The marker length.</param>
         private void WriteMarkerHeader(byte marker, int length)
         {
-            // Markers are always prefixed with with 0xff.
+            // Markers are always prefixed with 0xff.
             this.buffer[0] = JpegConstants.Markers.XFF;
             this.buffer[1] = marker;
             this.buffer[2] = (byte)(length >> 8);

@@ -6,6 +6,8 @@ using System.Buffers;
 using System.Numerics;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Memory;
+using SixLabors.ImageSharp.ParallelUtils;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Primitives;
 using SixLabors.Memory;
@@ -61,7 +63,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Overlays
         {
             this.GlowColor = color;
             this.Radius = radius;
-            this.blender = PixelOperations<TPixel>.Instance.GetPixelBlender(options.BlenderMode);
+            this.blender = PixelOperations<TPixel>.Instance.GetPixelBlender(options);
             this.GraphicsOptions = options;
         }
 
@@ -83,6 +85,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Overlays
         /// <inheritdoc/>
         protected override void OnFrameApply(ImageFrame<TPixel> source, Rectangle sourceRectangle, Configuration configuration)
         {
+            // TODO: can we simplify the rectangle calculation?
             int startY = sourceRectangle.Y;
             int endY = sourceRectangle.Bottom;
             int startX = sourceRectangle.X;
@@ -112,38 +115,43 @@ namespace SixLabors.ImageSharp.Processing.Processors.Overlays
             }
 
             int width = maxX - minX;
+            int offsetX = minX - startX;
+
+            var workingRect = Rectangle.FromLTRB(minX, minY, maxX, maxY);
+
             using (IMemoryOwner<TPixel> rowColors = source.MemoryAllocator.Allocate<TPixel>(width))
             {
-                // Be careful! Do not capture rowColorsSpan in the lambda below!
-                Span<TPixel> rowColorsSpan = rowColors.GetSpan();
+                rowColors.GetSpan().Fill(glowColor);
 
-                for (int i = 0; i < width; i++)
-                {
-                    rowColorsSpan[i] = glowColor;
-                }
-
-                Parallel.For(
-                    minY,
-                    maxY,
-                    configuration.ParallelOptions,
-                    y =>
-                    {
-                        using (IMemoryOwner<float> amounts = source.MemoryAllocator.Allocate<float>(width))
+                ParallelHelper.IterateRowsWithTempBuffer<float>(
+                    workingRect,
+                    configuration,
+                    (rows, amounts) =>
                         {
-                            Span<float> amountsSpan = amounts.GetSpan();
-                            int offsetY = y - startY;
-                            int offsetX = minX - startX;
-                            for (int i = 0; i < width; i++)
+                            Span<float> amountsSpan = amounts.Span;
+
+                            for (int y = rows.Min; y < rows.Max; y++)
                             {
-                                float distance = Vector2.Distance(center, new Vector2(i + offsetX, offsetY));
-                                amountsSpan[i] = (this.GraphicsOptions.BlendPercentage * (1 - (.95F * (distance / maxDistance)))).Clamp(0, 1);
+                                int offsetY = y - startY;
+
+                                for (int i = 0; i < width; i++)
+                                {
+                                    float distance = Vector2.Distance(center, new Vector2(i + offsetX, offsetY));
+                                    amountsSpan[i] =
+                                        (this.GraphicsOptions.BlendPercentage * (1 - (.95F * (distance / maxDistance))))
+                                        .Clamp(0, 1);
+                                }
+
+                                Span<TPixel> destination = source.GetPixelRowSpan(offsetY).Slice(offsetX, width);
+
+                                this.blender.Blend(
+                                    source.MemoryAllocator,
+                                    destination,
+                                    destination,
+                                    rowColors.GetSpan(),
+                                    amountsSpan);
                             }
-
-                            Span<TPixel> destination = source.GetPixelRowSpan(offsetY).Slice(offsetX, width);
-
-                            this.blender.Blend(source.MemoryAllocator, destination, destination, rowColors.GetSpan(), amountsSpan);
-                        }
-                    });
+                        });
             }
         }
     }

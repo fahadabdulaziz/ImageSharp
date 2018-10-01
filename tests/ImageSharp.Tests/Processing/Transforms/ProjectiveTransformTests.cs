@@ -20,7 +20,7 @@ namespace SixLabors.ImageSharp.Tests.Processing.Transforms
         private static readonly ImageComparer TolerantComparer = ImageComparer.TolerantPercentage(0.5f, 3);
 
         private ITestOutputHelper Output { get; }
-
+        
         public static readonly TheoryData<string> ResamplerNames = new TheoryData<string>
         {
             nameof(KnownResamplers.Bicubic),
@@ -124,9 +124,9 @@ namespace SixLabors.ImageSharp.Tests.Processing.Transforms
         {
             PropertyInfo property = typeof(KnownResamplers).GetTypeInfo().GetProperty(name);
 
-            if (property == null)
+            if (property is null)
             {
-                throw new Exception("Invalid property name!");
+                throw new Exception($"No resampler named {name}");
             }
 
             return (IResampler)property.GetValue(null);

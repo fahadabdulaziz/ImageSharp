@@ -6,6 +6,7 @@ using System.Buffers.Binary;
 using System.IO;
 using System.Runtime.CompilerServices;
 using SixLabors.ImageSharp.Common.Helpers;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.MetaData;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.Memory;
@@ -174,10 +175,7 @@ namespace SixLabors.ImageSharp.Formats.Bmp
         /// <param name="inverted">Whether the bitmap is inverted.</param>
         /// <returns>The <see cref="int"/> representing the inverted value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static int Invert(int y, int height, bool inverted)
-        {
-            return (!inverted) ? height - y - 1 : y;
-        }
+        private static int Invert(int y, int height, bool inverted) => (!inverted) ? height - y - 1 : y;
 
         /// <summary>
         /// Calculates the amount of bytes to pad a row.
@@ -205,10 +203,7 @@ namespace SixLabors.ImageSharp.Formats.Bmp
         /// <param name="value">The masked and shifted value</param>
         /// <returns>The <see cref="byte"/></returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static byte GetBytesFrom5BitValue(int value)
-        {
-            return (byte)((value << 3) | (value >> 2));
-        }
+        private static byte GetBytesFrom5BitValue(int value) => (byte)((value << 3) | (value >> 2));
 
         /// <summary>
         /// Looks up color values and builds the image from de-compressed RLE8 data.
@@ -372,11 +367,9 @@ namespace SixLabors.ImageSharp.Formats.Bmp
                     for (int x = 0; x < arrayWidth; x++)
                     {
                         int colOffset = x * ppb;
-
-                        for (int shift = 0; shift < ppb && (x + shift) < width; shift++)
+                        for (int shift = 0, newX = colOffset; shift < ppb && newX < width; shift++, newX++)
                         {
                             int colorIndex = ((rowSpan[offset] >> (8 - bits - (shift * bits))) & mask) * 4;
-                            int newX = colOffset + shift;
 
                             // Stored in b-> g-> r order.
                             rgba.Bgr = Unsafe.As<byte, Bgr24>(ref colors[colorIndex]);
@@ -525,8 +518,10 @@ namespace SixLabors.ImageSharp.Formats.Bmp
             }
 
             // Resolution is stored in PPM.
-            var meta = new ImageMetaData();
-            meta.ResolutionUnits = PixelResolutionUnit.PixelsPerMeter;
+            var meta = new ImageMetaData
+            {
+                ResolutionUnits = PixelResolutionUnit.PixelsPerMeter
+            };
             if (this.infoHeader.XPelsPerMeter > 0 && this.infoHeader.YPelsPerMeter > 0)
             {
                 meta.HorizontalResolution = this.infoHeader.XPelsPerMeter;
@@ -540,6 +535,16 @@ namespace SixLabors.ImageSharp.Formats.Bmp
             }
 
             this.metaData = meta;
+
+            short bitsPerPixel = this.infoHeader.BitsPerPixel;
+            var bmpMetaData = this.metaData.GetFormatMetaData(BmpFormat.Instance);
+
+            // We can only encode at these bit rates so far.
+            if (bitsPerPixel.Equals((short)BmpBitsPerPixel.Pixel24)
+                || bitsPerPixel.Equals((short)BmpBitsPerPixel.Pixel32))
+            {
+                bmpMetaData.BitsPerPixel = (BmpBitsPerPixel)bitsPerPixel;
+            }
 
             // skip the remaining header because we can't read those parts
             this.stream.Skip(skipAmount);
@@ -586,11 +591,11 @@ namespace SixLabors.ImageSharp.Formats.Bmp
 
             if (this.infoHeader.ClrUsed == 0)
             {
-                if (this.infoHeader.BitsPerPixel == 1 ||
-                    this.infoHeader.BitsPerPixel == 4 ||
-                    this.infoHeader.BitsPerPixel == 8)
+                if (this.infoHeader.BitsPerPixel == 1
+                    || this.infoHeader.BitsPerPixel == 4
+                    || this.infoHeader.BitsPerPixel == 8)
                 {
-                    colorMapSize = (int)Math.Pow(2, this.infoHeader.BitsPerPixel) * 4;
+                    colorMapSize = ImageMaths.GetColorCountForBitDepth(this.infoHeader.BitsPerPixel) * 4;
                 }
             }
             else

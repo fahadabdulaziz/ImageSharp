@@ -1,5 +1,5 @@
 version: 1.0.0.{build}
-image: Previous Visual Studio 2017
+image: Visual Studio 2017
 
 # prevent the double build when a branch has an active PR
 skip_branch_with_pr: true
@@ -11,9 +11,6 @@ environment:
 
     - target_framework: netcoreapp2.1
       is_32bit: True
-
-    - target_framework: netcoreapp2.0
-      is_32bit: False
 
     - target_framework: net471
       is_32bit: False
@@ -27,8 +24,6 @@ environment:
     - target_framework: net462
       is_32bit: True
     
-    #- target_framework: netcoreapp2.0 # As far as I understand, 32 bit test execution is not supported by "dotnet xunit"
-    #  is_32bit: True
     #- target_framework: mono
     #  is_32bit: False
     #- target_framework: mono

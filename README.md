@@ -70,6 +70,9 @@ Our API is designed to be simple to consume. Here's an example of the code requi
 On platforms supporting netstandard 1.3+
 
 ```csharp
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+
 // Image.Load(string path) is a shortcut for our default type. 
 // Other pixel formats use Image.Load<TPixel>(string path))
 using (Image<Rgba32> image = Image.Load("foo.jpg"))
@@ -83,6 +86,9 @@ using (Image<Rgba32> image = Image.Load("foo.jpg"))
 On netstandard 1.1 - 1.2
 
 ```csharp
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+
 // Image.Load(Stream stream) is a shortcut for our default type.
 // Other pixel formats use Image.Load<TPixel>(Stream stream))
 using (FileStream stream = File.OpenRead("foo.jpg"))
@@ -99,6 +105,9 @@ using (Image<Rgba32> image = Image.Load(stream))
 Setting individual pixel values can be performed as follows:
 
 ```csharp
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+
 // Individual pixels
 using (Image<Rgba32> image = new Image<Rgba32>(400, 400))
 {
@@ -117,12 +126,9 @@ For more examples check out:
 
 If you prefer, you can compile ImageSharp yourself (please do and help!)
 
-- Using [Visual Studio 2017 Preview](https://docs.microsoft.com/en-us/visualstudio/releasenotes/vs2017-preview-relnotes)
+- Using [Visual Studio 2017](https://visualstudio.microsoft.com/vs/)
   - Make sure you have the latest version installed
-  - Make sure you have [the newest 2.1 RC1 SDK installed](https://www.microsoft.com/net/core#windows)
-
-- Using [Visual Studio 2017](https://www.visualstudio.com/en-us/news/releasenotes/vs2017-relnotes)
-  - If you are unable and/or don't want to build ImageSharp.Tests against 2.1 RC, remove the `netcoreapp2.1` target [from TargetFrameworks](https://github.com/SixLabors/ImageSharp/blob/master/tests/ImageSharp.Tests/ImageSharp.Tests.csproj#L3) locally
+  - Make sure you have [the .NET Core 2.1 SDK](https://www.microsoft.com/net/core#windows) installed
 
 Alternatively, you can work from command line and/or with a lightweight editor on **both Linux/Unix and Windows**:
 

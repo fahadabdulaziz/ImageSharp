@@ -8,7 +8,7 @@ using System.Runtime.CompilerServices;
 namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
 {
     /// <summary>
-    /// Collection of Porter Duff alpha blending functions applying an the 'Over' composition model.
+    /// Collection of Porter Duff Color Blending and Alpha Composition Functions.
     /// </summary>
     /// <remarks>
     /// These functions are designed to be a general solution for all color cases,
@@ -25,13 +25,11 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Normal(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Normal(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
-            return Compose(backdrop, source, source);
+            return source;
         }
 
         /// <summary>
@@ -39,13 +37,11 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Multiply(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Multiply(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
-            return Compose(backdrop, source, backdrop * source);
+            return backdrop * source;
         }
 
         /// <summary>
@@ -53,13 +49,11 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Add(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Add(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
-            return Compose(backdrop, source, Vector4.Min(Vector4.One, backdrop + source));
+            return Vector4.Min(Vector4.One, backdrop + source);
         }
 
         /// <summary>
@@ -67,13 +61,11 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Subtract(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Subtract(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
-            return Compose(backdrop, source, Vector4.Max(Vector4.Zero, backdrop - source));
+            return Vector4.Max(Vector4.Zero, backdrop - source);
         }
 
         /// <summary>
@@ -81,13 +73,11 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Screen(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Screen(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
-            return Compose(backdrop, source, Vector4.One - ((Vector4.One - backdrop) * (Vector4.One - source)));
+            return Vector4.One - ((Vector4.One - backdrop) * (Vector4.One - source));
         }
 
         /// <summary>
@@ -95,13 +85,11 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Darken(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Darken(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
-            return Compose(backdrop, source, Vector4.Min(backdrop, source));
+            return Vector4.Min(backdrop, source);
         }
 
         /// <summary>
@@ -109,13 +97,11 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Lighten(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Lighten(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
-            return Compose(backdrop, source, Vector4.Max(backdrop, source));
+            return Vector4.Max(backdrop, source);
         }
 
         /// <summary>
@@ -123,17 +109,15 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 Overlay(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 Overlay(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
             float cr = OverlayValueFunction(backdrop.X, source.X);
             float cg = OverlayValueFunction(backdrop.Y, source.Y);
             float cb = OverlayValueFunction(backdrop.Z, source.Z);
 
-            return Compose(backdrop, source, Vector4.Min(Vector4.One, new Vector4(cr, cg, cb, 0)));
+            return Vector4.Min(Vector4.One, new Vector4(cr, cg, cb, 0));
         }
 
         /// <summary>
@@ -141,17 +125,15 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
         /// </summary>
         /// <param name="backdrop">Backdrop color</param>
         /// <param name="source">Source color</param>
-        /// <param name="opacity">Opacity applied to Source Alpha</param>
         /// <returns>Output color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public static Vector4 HardLight(Vector4 backdrop, Vector4 source, float opacity)
+        public static Vector4 HardLight(Vector4 backdrop, Vector4 source)
         {
-            source.W *= opacity;
             float cr = OverlayValueFunction(source.X, backdrop.X);
             float cg = OverlayValueFunction(source.Y, backdrop.Y);
             float cb = OverlayValueFunction(source.Z, backdrop.Z);
 
-            return Compose(backdrop, source, Vector4.Min(Vector4.One, new Vector4(cr, cg, cb, 0)));
+            return Vector4.Min(Vector4.One, new Vector4(cr, cg, cb, 0));
         }
 
         /// <summary>
@@ -166,29 +148,91 @@ namespace SixLabors.ImageSharp.PixelFormats.PixelBlenders
             return backdrop <= 0.5f ? (2 * backdrop * source) : 1 - ((2 * (1 - source)) * (1 - backdrop));
         }
 
-        /// <summary>
-        /// General composition function for all modes, with a general solution for alpha channel
-        /// </summary>
-        /// <param name="backdrop">Original Backdrop color</param>
-        /// <param name="source">Original source color</param>
-        /// <param name="xform">Desired transformed color, without taking Alpha channel in account</param>
-        /// <returns>The final color</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static Vector4 Compose(Vector4 backdrop, Vector4 source, Vector4 xform)
+        public static Vector4 Over(Vector4 dst, Vector4 src, Vector4 blend)
         {
             // calculate weights
-            float xw = backdrop.W * source.W;
-            float bw = backdrop.W - xw;
-            float sw = source.W - xw;
+            float blendW = dst.W * src.W;
+            float dstW = dst.W - blendW;
+            float srcW = src.W - blendW;
 
             // calculate final alpha
-            float a = xw + bw + sw;
+            float alpha = dstW + srcW + blendW;
 
-            // calculate final value
-            xform = ((xform * xw) + (backdrop * bw) + (source * sw)) / MathF.Max(a, Constants.Epsilon);
-            xform.W = a;
+            // calculate final color
+            Vector4 color = (dst * dstW) + (src * srcW) + (blend * blendW);
 
-            return xform;
+            // unpremultiply
+            color /= MathF.Max(alpha, Constants.Epsilon);
+            color.W = alpha;
+
+            return color;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Atop(Vector4 dst, Vector4 src, Vector4 blend)
+        {
+            // calculate weights
+            float blendW = dst.W * src.W;
+            float dstW = dst.W - blendW;
+
+            // calculate final alpha
+            float alpha = dstW + blendW;
+
+            // calculate final color
+            Vector4 color = (dst * dstW) + (blend * blendW);
+
+            // unpremultiply
+            color /= MathF.Max(alpha, Constants.Epsilon);
+            color.W = alpha;
+
+            return color;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 In(Vector4 dst, Vector4 src, Vector4 blend)
+        {
+            float alpha = dst.W * src.W;
+
+            Vector4 color = src * alpha;                    // premultiply
+            color /= MathF.Max(alpha, Constants.Epsilon);   // unpremultiply
+            color.W = alpha;
+
+            return color;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Out(Vector4 dst, Vector4 src)
+        {
+            float alpha = (1 - dst.W) * src.W;
+
+            Vector4 color = src * alpha;                    // premultiply
+            color /= MathF.Max(alpha, Constants.Epsilon);   // unpremultiply
+            color.W = alpha;
+
+            return color;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static Vector4 Xor(Vector4 dst, Vector4 src)
+        {
+            float srcW = 1 - dst.W;
+            float dstW = 1 - src.W;
+
+            float alpha = (src.W * srcW) + (dst.W * dstW);
+            Vector4 color = (src.W * src * srcW) + (dst.W * dst * dstW);
+
+            // unpremultiply
+            color /= MathF.Max(alpha, Constants.Epsilon);
+            color.W = alpha;
+
+            return color;
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static Vector4 Clear(Vector4 backdrop, Vector4 source)
+        {
+            return Vector4.Zero;
         }
     }
 }

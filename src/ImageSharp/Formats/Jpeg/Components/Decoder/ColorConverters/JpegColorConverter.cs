@@ -7,6 +7,7 @@ using System.Linq;
 using System.Numerics;
 
 using SixLabors.ImageSharp.Common.Tuples;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder.ColorConverters
@@ -43,7 +44,8 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder.ColorConverters
         public static JpegColorConverter GetConverter(JpegColorSpace colorSpace)
         {
             JpegColorConverter converter = Converters.FirstOrDefault(c => c.ColorSpace == colorSpace);
-            if (converter == null)
+
+            if (converter is null)
             {
                 throw new Exception($"Could not find any converter for JpegColorSpace {colorSpace}!");
             }
@@ -56,7 +58,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder.ColorConverters
         /// </summary>
         /// <param name="values">The input as a stack-only <see cref="ComponentValues"/> struct</param>
         /// <param name="result">The destination buffer of <see cref="Vector4"/> values</param>
-        public abstract void ConvertToRgba(ComponentValues values, Span<Vector4> result);
+        public abstract void ConvertToRgba(in ComponentValues values, Span<Vector4> result);
 
         /// <summary>
         /// Returns the <see cref="JpegColorConverter"/> for the YCbCr colorspace that matches the current CPU architecture.

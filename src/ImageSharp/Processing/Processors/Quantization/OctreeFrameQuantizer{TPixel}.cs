@@ -22,7 +22,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
         /// <summary>
         /// Maximum allowed color depth
         /// </summary>
-        private readonly byte colors;
+        private readonly int colors;
 
         /// <summary>
         /// Stores the tree
@@ -43,9 +43,23 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
         /// the second pass quantizes a color based on the nodes in the tree
         /// </remarks>
         public OctreeFrameQuantizer(OctreeQuantizer quantizer)
+            : this(quantizer, quantizer.MaxColors)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OctreeFrameQuantizer{TPixel}"/> class.
+        /// </summary>
+        /// <param name="quantizer">The octree quantizer.</param>
+        /// <param name="maxColors">The maximum number of colors to hold in the color palette.</param>
+        /// <remarks>
+        /// The Octree quantizer is a two pass algorithm. The initial pass sets up the Octree,
+        /// the second pass quantizes a color based on the nodes in the tree
+        /// </remarks>
+        public OctreeFrameQuantizer(OctreeQuantizer quantizer, int maxColors)
             : base(quantizer, false)
         {
-            this.colors = (byte)quantizer.MaxColors;
+            this.colors = maxColors;
             this.octree = new Octree(ImageMaths.GetBitsNeededForColorDepth(this.colors).Clamp(1, 8));
         }
 
@@ -233,7 +247,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
                 {
                     // If so, check if I have a previous node setup. This will only occur if the first color in the image
                     // happens to be black, with an alpha component of zero.
-                    if (this.previousNode == null)
+                    if (this.previousNode is null)
                     {
                         this.previousColor = pixel;
                         this.root.AddColor(ref pixel, this.maxColorBits, 0, this, ref rgba);
@@ -261,13 +275,13 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             public TPixel[] Palletize(int colorCount)
             {
-                while (this.Leaves > colorCount)
+                while (this.Leaves > colorCount - 1)
                 {
                     this.Reduce();
                 }
 
                 // Now palletize the nodes
-                var palette = new TPixel[colorCount + 1];
+                var palette = new TPixel[colorCount];
 
                 int paletteIndex = 0;
                 this.root.ConstructPalette(palette, ref paletteIndex);
@@ -285,10 +299,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
             /// The <see cref="int"/>.
             /// </returns>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            public int GetPaletteIndex(ref TPixel pixel, ref Rgba32 rgba)
-            {
-                return this.root.GetPaletteIndex(ref pixel, 0, ref rgba);
-            }
+            public int GetPaletteIndex(ref TPixel pixel, ref Rgba32 rgba) => this.root.GetPaletteIndex(ref pixel, 0, ref rgba);
 
             /// <summary>
             /// Keep track of the previous node that was quantized
@@ -297,10 +308,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
             /// The node last quantized
             /// </param>
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
-            protected void TrackPrevious(OctreeNode node)
-            {
-                this.previousNode = node;
-            }
+            protected void TrackPrevious(OctreeNode node) => this.previousNode = node;
 
             /// <summary>
             /// Reduce the depth of the tree
@@ -309,7 +317,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
             {
                 // Find the deepest level containing at least one reducible node
                 int index = this.maxColorBits - 1;
-                while ((index > 0) && (this.ReducibleNodes[index] == null))
+                while ((index > 0) && (this.ReducibleNodes[index] is null))
                 {
                     index--;
                 }
@@ -440,7 +448,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Quantization
                                     | ((rgba.R & Mask[level]) >> shift);
 
                         OctreeNode child = this.children[index];
-                        if (child == null)
+                        if (child is null)
                         {
                             // Create a new child node and store it in the array
                             child = new OctreeNode(level + 1, colorBits, octree);

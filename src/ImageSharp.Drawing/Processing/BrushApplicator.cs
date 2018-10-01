@@ -5,6 +5,7 @@ using System;
 using System.Buffers;
 
 using SixLabors.ImageSharp.Advanced;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.Memory;
 
@@ -27,7 +28,7 @@ namespace SixLabors.ImageSharp.Processing
         {
             this.Target = target;
             this.Options = options;
-            this.Blender = PixelOperations<TPixel>.Instance.GetPixelBlender(options.BlenderMode);
+            this.Blender = PixelOperations<TPixel>.Instance.GetPixelBlender(options);
         }
 
         /// <summary>

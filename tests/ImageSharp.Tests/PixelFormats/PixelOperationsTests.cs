@@ -6,7 +6,7 @@ using System.Buffers;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
-using SixLabors.Memory;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
 using Xunit;
 using Xunit.Abstractions;
@@ -88,6 +88,17 @@ namespace SixLabors.ImageSharp.Tests.PixelFormats
             where TPixel : struct, IPixel<TPixel>
         {
             Assert.NotNull(PixelOperations<TPixel>.Instance);
+        }
+
+        [Fact]
+        public void IsOpaqueColor()
+        {
+            Assert.True(new GraphicsOptions(true).IsOpaqueColorWithoutBlending(ImageSharp.PixelFormats.Rgba32.Red));
+
+            Assert.False(new GraphicsOptions(true, 0.5f).IsOpaqueColorWithoutBlending(ImageSharp.PixelFormats.Rgba32.Red));
+            Assert.False(new GraphicsOptions(true).IsOpaqueColorWithoutBlending(ImageSharp.PixelFormats.Rgba32.Transparent));
+            Assert.False(new GraphicsOptions(true, PixelColorBlendingMode.Lighten, 1).IsOpaqueColorWithoutBlending(ImageSharp.PixelFormats.Rgba32.Red));
+            Assert.False(new GraphicsOptions(true, PixelColorBlendingMode.Normal,PixelAlphaCompositionMode.DestOver, 1).IsOpaqueColorWithoutBlending(ImageSharp.PixelFormats.Rgba32.Red));
         }
     }
 
