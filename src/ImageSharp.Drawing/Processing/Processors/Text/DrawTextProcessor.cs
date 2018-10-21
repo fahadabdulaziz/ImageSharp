@@ -97,7 +97,7 @@ namespace SixLabors.ImageSharp.Processing.Processors.Text
 
             this.textRenderer = new CachingGlyphRenderer(source.GetMemoryAllocator(), this.Text.Length, this.Pen, this.Brush != null);
             this.textRenderer.Options = (GraphicsOptions)this.Options;
-            TextRenderer.RenderTextTo(this.textRenderer, this.Text, style);
+            TextRenderer.RenderTextTo(this.textRenderer, new ReadOnlySpan<char>(this.Text.ToCharArray()), style);
         }
 
         protected override void AfterImageApply(Image<TPixel> source, Rectangle sourceRectangle)
