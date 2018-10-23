@@ -6,8 +6,8 @@
     <RootNamespace>SixLabors.ImageSharp.Benchmarks</RootNamespace>
     <AssemblyName>ImageSharp.Benchmarks</AssemblyName>
     <LangVersion>7.2</LangVersion>
-    <AssemblyVersion>1.0.0.1</AssemblyVersion>
-    <FileVersion>2018.10.7.1</FileVersion>
+    <AssemblyVersion>1.0.0.2</AssemblyVersion>
+    <FileVersion>2018.10.23.2</FileVersion>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(TargetFramework)'=='net461'">
