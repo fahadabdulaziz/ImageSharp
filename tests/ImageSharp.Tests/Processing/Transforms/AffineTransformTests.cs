@@ -65,10 +65,7 @@ namespace SixLabors.ImageSharp.Tests.Processing.Transforms
                     nameof(KnownResamplers.Lanczos8),
                 };
 
-        public AffineTransformTests(ITestOutputHelper output)
-        {
-            this.Output = output;
-        }
+        public AffineTransformTests(ITestOutputHelper output) => this.Output = output;
 
         /// <summary>
         /// The output of an "all white" image should be "all white" or transparent, regardless of the transformation and the resampler.
@@ -240,12 +237,15 @@ namespace SixLabors.ImageSharp.Tests.Processing.Transforms
             where TPixel : struct, IPixel<TPixel>
         {
             Span<TPixel> data = image.Frames.RootFrame.GetPixelSpan();
-            var rgba = default(Rgba32);
             var white = new Rgb24(255, 255, 255);
             foreach (TPixel pixel in data)
             {
+                Rgba32 rgba = default;
                 pixel.ToRgba32(ref rgba);
-                if (rgba.A == 0) continue;
+                if (rgba.A == 0)
+                {
+                    continue;
+                }
 
                 Assert.Equal(white, rgba.Rgb);
             }
