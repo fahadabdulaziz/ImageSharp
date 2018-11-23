@@ -16,6 +16,7 @@
     <LangVersion>7.2</LangVersion>
     <AssemblyVersion>1.0.0.2</AssemblyVersion>
     <FileVersion>2018.10.23.2</FileVersion>
+    <LangVersion>7.3</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ImageSharp.Drawing\ImageSharp.Drawing.csproj" />
@@ -26,6 +27,7 @@
     <PackageReference Include="xunit" Version="2.3.0-beta4-build3742" />
     <PackageReference Include="Moq" Version="4.7.127" />
     <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="7.5.0" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="7.9.0.1" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="Moq" Version="4.8.3" />
     <!--<PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.0.0" />-->

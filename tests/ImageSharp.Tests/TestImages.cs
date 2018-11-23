@@ -46,6 +46,9 @@ namespace SixLabors.ImageSharp.Tests
             public const string PDSrc = "Png/pd-source.png";
             public const string PDDest = "Png/pd-dest.png";
             public const string Gray1BitTrans = "Png/gray-1-trns.png";
+            public const string Gray2BitTrans = "Png/gray-2-tRNS.png";
+            public const string Gray4BitTrans = "Png/gray-4-tRNS.png";
+            public const string Gray8BitTrans = "Png/gray-8-tRNS.png";
 
             // Filtered test images from http://www.schaik.com/pngsuite/pngsuite_fil_png.html
             public const string Filter0 = "Png/filter0.png";
@@ -165,6 +168,18 @@ namespace SixLabors.ImageSharp.Tests
             }
 
             public static readonly string[] All = Baseline.All.Concat(Progressive.All).ToArray();
+
+            public static class BenchmarkSuite
+            {
+                public const string Jpeg400_SmallMonochrome = Baseline.Jpeg400;
+                public const string Jpeg420Exif_MidSizeYCbCr = Baseline.Jpeg420Exif;
+                public const string Lake_Small444YCbCr = Baseline.Lake;
+
+                // A few large images from the "issues" set are actually very useful for benchmarking:
+                public const string MissingFF00ProgressiveBedroom159_MidSize420YCbCr = Issues.MissingFF00ProgressiveBedroom159;
+                public const string BadRstProgressive518_Large444YCbCr = Issues.BadRstProgressive518;
+                public const string ExifGetString750Transform_Huge420YCbCr = Issues.ExifGetString750Transform;
+            }
         }
 
         public static class Bmp
