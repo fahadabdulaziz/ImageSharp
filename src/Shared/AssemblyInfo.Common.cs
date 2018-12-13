@@ -27,8 +27,8 @@ using System.Runtime.CompilerServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("1.0.0.71")]
-[assembly: AssemblyFileVersion("2018.10.24.71")]
+[assembly: AssemblyVersion("1.0.0.73")]
+[assembly: AssemblyFileVersion("2018.11.23.73")]
 [assembly: AssemblyInformationalVersion("1.0.0.0")]
 
 // Ensure the internals can be built and tested.
