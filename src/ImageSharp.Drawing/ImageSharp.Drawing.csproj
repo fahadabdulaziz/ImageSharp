@@ -1,10 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <Description>An extension to ImageSharp that allows the drawing of images, paths, and text.</Description>
     <AssemblyTitle>SixLabors.ImageSharp.Drawing</AssemblyTitle>
+    <Authors>SixLabors and contributors</Authors>
+    <Company>Six Labors</Company>
+    <Copyright>Copyright (c) Six Labors and contributors.</Copyright>
+    <Product>SixLabors.ImageSharp</Product>
+    <Description>An extension to ImageSharp that allows the drawing of images, paths, and text.</Description>
+    <NeutralLanguage>en</NeutralLanguage>
+
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
-    <Authors>SixLabors and contributors</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -17,15 +22,6 @@
     <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/SixLabors/ImageSharp</RepositoryUrl>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateNeutralResourcesLanguageAttribute>false</GenerateNeutralResourcesLanguageAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <DebugType Condition="$(codecov) != ''">full</DebugType>
     <DebugType Condition="$(codecov) == ''">portable</DebugType>
     <DebugSymbols>True</DebugSymbols>
@@ -44,10 +40,10 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SixLabors.Core">
-      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
+      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Fonts">
-      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Fonts.dll</HintPath>
+      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Debug\netstandard2.0\SixLabors.Fonts.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Shapes">
       <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.dll</HintPath>
@@ -59,58 +55,12 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
+    <AssemblyVersion>0.0.1.3</AssemblyVersion>
+    <FileVersion>2018.12.13.3</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
-    <PropertyGroup>      
-        <AssemblyTitle>SixLabors.ImageSharp.Drawing</AssemblyTitle>
-        <Authors>SixLabors and contributors</Authors>
-        <Company>Six Labors</Company>
-        <Copyright>Copyright (c) Six Labors and contributors.</Copyright>
-        <Product>SixLabors.ImageSharp</Product>
-        <Description>An extension to ImageSharp that allows the drawing of images, paths, and text.</Description>
-        <NeutralLanguage>en</NeutralLanguage>
-
-        <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
-        <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
-        <TargetFrameworks>netstandard1.3;netstandard2.0</TargetFrameworks>
-        <LangVersion>7.3</LangVersion>
-        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-        <GenerateDocumentationFile>true</GenerateDocumentationFile>
-        <AssemblyName>SixLabors.ImageSharp.Drawing</AssemblyName>
-        <PackageId>SixLabors.ImageSharp.Drawing</PackageId>
-        <PackageTags>Image Draw Shape Path Font</PackageTags>
-        <PackageIconUrl>https://raw.githubusercontent.com/SixLabors/Branding/master/icons/imagesharp/sixlabors.imagesharp.128.png</PackageIconUrl>
-        <PackageProjectUrl>https://github.com/SixLabors/ImageSharp</PackageProjectUrl>
-        <PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0</PackageLicenseUrl>
-        <RepositoryType>git</RepositoryType>
-        <RepositoryUrl>https://github.com/SixLabors/ImageSharp</RepositoryUrl>
-        <DebugType Condition="$(codecov) != ''">full</DebugType>
-        <DebugType Condition="$(codecov) == ''">portable</DebugType>
-        <DebugSymbols>True</DebugSymbols>
-    </PropertyGroup>
-    <ItemGroup>
-        <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-    </ItemGroup>
-    <ItemGroup>
-        <ProjectReference Include="..\ImageSharp\ImageSharp.csproj" />
-    </ItemGroup>
-    <ItemGroup>
-        <AdditionalFiles Include="..\..\stylecop.json" />
-        <PackageReference Include="SixLabors.Fonts" Version="1.0.0-dev000119" />
-        <PackageReference Include="SixLabors.Shapes" Version="1.0.0-dev000102" />
-        <PackageReference Include="StyleCop.Analyzers" Version="1.1.0-beta007">
-            <PrivateAssets>All</PrivateAssets>
-        </PackageReference>
-    </ItemGroup>
-    <PropertyGroup>
-        <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
-        <RootNamespace>SixLabors.ImageSharp</RootNamespace>
-    </PropertyGroup>
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-    </PropertyGroup>
 </Project>
