@@ -40,23 +40,23 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="SixLabors.Core">
-      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Fonts">
-      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Debug\netstandard2.0\SixLabors.Fonts.dll</HintPath>
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Fonts.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Shapes">
-      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.dll</HintPath>
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Shapes.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Shapes.Text">
-      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Debug\netstandard2.0\SixLabors.Shapes.Text.dll</HintPath>
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Shapes.Text.dll</HintPath>
     </Reference>
   </ItemGroup>
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
-    <AssemblyVersion>0.0.1.3</AssemblyVersion>
-    <FileVersion>2018.12.13.3</FileVersion>
+    <AssemblyVersion>0.0.1.5</AssemblyVersion>
+    <FileVersion>2018.12.26.5</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>

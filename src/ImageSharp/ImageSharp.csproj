@@ -49,8 +49,8 @@
   <PropertyGroup>
     <CodeAnalysisRuleSet>..\..\ImageSharp.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
-    <AssemblyVersion>0.0.1.4</AssemblyVersion>
-    <FileVersion>2018.12.13.4</FileVersion>
+    <AssemblyVersion>0.0.1.5</AssemblyVersion>
+    <FileVersion>2018.12.26.5</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -59,7 +59,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="SixLabors.Core">
-      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Debug\netstandard2.0\SixLabors.Core.dll</HintPath>
+      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
