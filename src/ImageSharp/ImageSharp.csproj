@@ -11,7 +11,6 @@
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <TargetFrameworks>netcoreapp2.1;netstandard1.3;netstandard2.0;net472</TargetFrameworks>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <AssemblyName>SixLabors.ImageSharp</AssemblyName>
@@ -29,27 +28,20 @@
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' OR '$(TargetFramework)' == 'net472' ">
-    <DefineConstants>$(DefineConstants);SUPPORTS_EXTENDED_INTRINSICS</DefineConstants>
-  </PropertyGroup>
-
   <ItemGroup>
     <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.1" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
     <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
-    <AdditionalFiles Include="..\..\stylecop.json" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.1" />
+    <AdditionalFiles Include="..\..\standards\stylecop.json" />    
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
   </ItemGroup>
 
-
   <PropertyGroup>
-    <CodeAnalysisRuleSet>..\..\standards\SixLabors.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\SixLabors.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
-    <AssemblyVersion>0.0.1.8</AssemblyVersion>
-    <FileVersion>2019.1.25.8</FileVersion>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
   </PropertyGroup>
@@ -60,9 +52,13 @@
 
   <ItemGroup>
     <Reference Include="SixLabors.Core">
-      <HintPath>..\..\..\Core\src\SixLabors.Core\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
+      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="SixLabors.Fonts">
+      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Release\netstandard2.0\SixLabors.Fonts.dll</HintPath>
     </Reference>
   </ItemGroup>
+
   <ItemGroup>
     <None Update="Formats\Jpeg\Components\Block8x8F.Generated.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
