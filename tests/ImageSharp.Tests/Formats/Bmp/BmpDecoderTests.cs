@@ -13,7 +13,7 @@ using Xunit;
 
 namespace SixLabors.ImageSharp.Tests
 {
-    using SixLabors.ImageSharp.MetaData;
+    using SixLabors.ImageSharp.Metadata;
     using static TestImages.Bmp;
 
     public class BmpDecoderTests
@@ -57,6 +57,20 @@ namespace SixLabors.ImageSharp.Tests
             {
                 image.DebugSave(provider);
                 image.CompareToOriginal(provider);
+            }
+        }
+
+        [Theory]
+        [WithFile(RgbaAlphaBitfields, PixelTypes.Rgba32)]
+        public void BmpDecoder_CanDecodeAlphaBitfields<TPixel>(TestImageProvider<TPixel> provider)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            using (Image<TPixel> image = provider.GetImage(new BmpDecoder()))
+            {
+                image.DebugSave(provider);
+
+                // TODO: Neither System.Drawing nor MagickReferenceDecoder decode this file.
+                // image.CompareToOriginal(provider);
             }
         }
 
@@ -115,6 +129,18 @@ namespace SixLabors.ImageSharp.Tests
         }
 
         [Theory]
+        [WithFile(LessThanFullSizedPalette, PixelTypes.Rgba32)]
+        public void BmpDecoder_CanDecodeLessThanFullPalete<TPixel>(TestImageProvider<TPixel> provider)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            using (Image<TPixel> image = provider.GetImage(new BmpDecoder()))
+            {
+                image.DebugSave(provider);
+                image.CompareToOriginal(provider, new MagickReferenceDecoder());
+            }
+        }
+
+        [Theory]
         [WithFile(Rgba32bf56, PixelTypes.Rgba32)]
         public void BmpDecoder_CanDecodeAdobeBmpv3<TPixel>(TestImageProvider<TPixel> provider)
             where TPixel : struct, IPixel<TPixel>
@@ -141,6 +167,18 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithFile(WinBmpv5, PixelTypes.Rgba32)]
         public void BmpDecoder_CanDecodeBmpv5<TPixel>(TestImageProvider<TPixel> provider)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            using (Image<TPixel> image = provider.GetImage(new BmpDecoder()))
+            {
+                image.DebugSave(provider);
+                image.CompareToOriginal(provider);
+            }
+        }
+
+        [Theory]
+        [WithFile(Pal8Offset, PixelTypes.Rgba32)]
+        public void BmpDecoder_RespectsFileHeaderOffset<TPixel>(TestImageProvider<TPixel> provider)
             where TPixel : struct, IPixel<TPixel>
         {
             using (Image<TPixel> image = provider.GetImage(new BmpDecoder()))
@@ -199,7 +237,7 @@ namespace SixLabors.ImageSharp.Tests
                 var decoder = new BmpDecoder();
                 using (Image<Rgba32> image = decoder.Decode<Rgba32>(Configuration.Default, stream))
                 {
-                    ImageMetaData meta = image.MetaData;
+                    ImageMetadata meta = image.Metadata;
                     Assert.Equal(xResolution, meta.HorizontalResolution);
                     Assert.Equal(yResolution, meta.VerticalResolution);
                     Assert.Equal(resolutionUnit, meta.ResolutionUnits);
