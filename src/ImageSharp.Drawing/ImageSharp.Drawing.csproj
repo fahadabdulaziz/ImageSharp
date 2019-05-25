@@ -11,6 +11,9 @@
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
     <TargetFramework>netstandard2.0</TargetFramework>
+
+    <TargetFrameworks>netcoreapp2.1;netstandard1.3;netstandard2.0</TargetFrameworks>
+    
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -70,6 +73,9 @@
     <Reference Include="SixLabors.Shapes.Text">
       <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Shapes.Text.dll</HintPath>
     </Reference>
+    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
+    <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta0008" />
+    <PackageReference Include="SixLabors.Shapes" Version="1.0.0-beta0008" />
   </ItemGroup>
 
   <PropertyGroup>

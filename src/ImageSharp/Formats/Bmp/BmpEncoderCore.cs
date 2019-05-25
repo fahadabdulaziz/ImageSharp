@@ -2,13 +2,16 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
+using System.Buffers;
 using System.IO;
+using System.Runtime.InteropServices;
 
 using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Common.Helpers;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Metadata;
 using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing.Processors.Quantization;
 using SixLabors.Memory;
 
 namespace SixLabors.ImageSharp.Formats.Bmp
@@ -24,24 +27,29 @@ namespace SixLabors.ImageSharp.Formats.Bmp
         private int padding;
 
         /// <summary>
-        /// The mask for the alpha channel of the color for a 32 bit rgba bitmaps.
+        /// The mask for the alpha channel of the color for 32 bit rgba bitmaps.
         /// </summary>
         private const int Rgba32AlphaMask = 0xFF << 24;
 
         /// <summary>
-        /// The mask for the red part of the color for a 32 bit rgba bitmaps.
+        /// The mask for the red part of the color for 32 bit rgba bitmaps.
         /// </summary>
         private const int Rgba32RedMask = 0xFF << 16;
 
         /// <summary>
-        /// The mask for the green part of the color for a 32 bit rgba bitmaps.
+        /// The mask for the green part of the color for 32 bit rgba bitmaps.
         /// </summary>
         private const int Rgba32GreenMask = 0xFF << 8;
 
         /// <summary>
-        /// The mask for the blue part of the color for a 32 bit rgba bitmaps.
+        /// The mask for the blue part of the color for 32 bit rgba bitmaps.
         /// </summary>
         private const int Rgba32BlueMask = 0xFF;
+
+        /// <summary>
+        /// The color palette for an 8 bit image will have 256 entry's with 4 bytes for each entry.
+        /// </summary>
+        private const int ColorPaletteSize8Bit = 1024;
 
         private readonly MemoryAllocator memoryAllocator;
 
@@ -50,14 +58,28 @@ namespace SixLabors.ImageSharp.Formats.Bmp
         private BmpBitsPerPixel? bitsPerPixel;
 
         /// <summary>
+        /// A bitmap v4 header will only be written, if the user explicitly wants support for transparency.
+        /// In this case the compression type BITFIELDS will be used.
+        /// Otherwise a bitmap v3 header will be written, which is supported by almost all decoders.
+        /// </summary>
+        private readonly bool writeV4Header;
+
+        /// <summary>
+        /// The quantizer for reducing the color count for 8-Bit images.
+        /// </summary>
+        private readonly IQuantizer quantizer;
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="BmpEncoderCore"/> class.
         /// </summary>
-        /// <param name="options">The encoder options</param>
-        /// <param name="memoryAllocator">The memory manager</param>
+        /// <param name="options">The encoder options.</param>
+        /// <param name="memoryAllocator">The memory manager.</param>
         public BmpEncoderCore(IBmpEncoderOptions options, MemoryAllocator memoryAllocator)
         {
             this.memoryAllocator = memoryAllocator;
             this.bitsPerPixel = options.BitsPerPixel;
+            this.writeV4Header = options.SupportTransparency;
+            this.quantizer = options.Quantizer ?? new OctreeQuantizer(dither: true, maxColors: 256);
         }
 
         /// <summary>
@@ -112,7 +134,7 @@ namespace SixLabors.ImageSharp.Formats.Bmp
                 }
             }
 
-            int infoHeaderSize = BmpInfoHeader.SizeV4;
+            int infoHeaderSize = this.writeV4Header ? BmpInfoHeader.SizeV4 : BmpInfoHeader.SizeV3;
             var infoHeader = new BmpInfoHeader(
                 headerSize: infoHeaderSize,
                 height: image.Height,
@@ -123,24 +145,24 @@ namespace SixLabors.ImageSharp.Formats.Bmp
                 clrUsed: 0,
                 clrImportant: 0,
                 xPelsPerMeter: hResolution,
-                yPelsPerMeter: vResolution)
-            {
-                RedMask = Rgba32RedMask,
-                GreenMask = Rgba32GreenMask,
-                BlueMask = Rgba32BlueMask,
-                Compression = BmpCompression.BitFields
-            };
+                yPelsPerMeter: vResolution);
 
-            if (this.bitsPerPixel == BmpBitsPerPixel.Pixel32)
+            if (this.writeV4Header && this.bitsPerPixel == BmpBitsPerPixel.Pixel32)
             {
                 infoHeader.AlphaMask = Rgba32AlphaMask;
+                infoHeader.RedMask = Rgba32RedMask;
+                infoHeader.GreenMask = Rgba32GreenMask;
+                infoHeader.BlueMask = Rgba32BlueMask;
+                infoHeader.Compression = BmpCompression.BitFields;
             }
+
+            int colorPaletteSize = this.bitsPerPixel == BmpBitsPerPixel.Pixel8 ? ColorPaletteSize8Bit : 0;
 
             var fileHeader = new BmpFileHeader(
                 type: BmpConstants.TypeMarkers.Bitmap,
                 fileSize: BmpFileHeader.Size + infoHeaderSize + infoHeader.ImageSize,
                 reserved: 0,
-                offset: BmpFileHeader.Size + infoHeaderSize);
+                offset: BmpFileHeader.Size + infoHeaderSize + colorPaletteSize);
 
 #if NETCOREAPP2_1
             Span<byte> buffer = stackalloc byte[infoHeaderSize];
@@ -151,7 +173,14 @@ namespace SixLabors.ImageSharp.Formats.Bmp
 
             stream.Write(buffer, 0, BmpFileHeader.Size);
 
-            infoHeader.WriteV4Header(buffer);
+            if (this.writeV4Header)
+            {
+                infoHeader.WriteV4Header(buffer);
+            }
+            else
+            {
+                infoHeader.WriteV3Header(buffer);
+            }
 
             stream.Write(buffer, 0, infoHeaderSize);
 
@@ -180,6 +209,14 @@ namespace SixLabors.ImageSharp.Formats.Bmp
 
                 case BmpBitsPerPixel.Pixel24:
                     this.Write24Bit(stream, pixels);
+                    break;
+
+                case BmpBitsPerPixel.Pixel16:
+                    this.Write16Bit(stream, pixels);
+                    break;
+
+                case BmpBitsPerPixel.Pixel8:
+                    this.Write8Bit(stream, image);
                     break;
             }
         }
@@ -230,6 +267,138 @@ namespace SixLabors.ImageSharp.Formats.Bmp
                         row.GetSpan(),
                         pixelSpan.Length);
                     stream.Write(row.Array, 0, row.Length());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes the 16bit color palette to the stream.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="stream">The <see cref="Stream"/> to write to.</param>
+        /// <param name="pixels">The <see cref="Buffer2D{TPixel}"/> containing pixel data.</param>
+        private void Write16Bit<TPixel>(Stream stream, Buffer2D<TPixel> pixels)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            using (IManagedByteBuffer row = this.AllocateRow(pixels.Width, 2))
+            {
+                for (int y = pixels.Height - 1; y >= 0; y--)
+                {
+                    Span<TPixel> pixelSpan = pixels.GetRowSpan(y);
+
+                    PixelOperations<TPixel>.Instance.ToBgra5551Bytes(
+                        this.configuration,
+                        pixelSpan,
+                        row.GetSpan(),
+                        pixelSpan.Length);
+
+                    stream.Write(row.Array, 0, row.Length());
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes an 8 Bit image with a color palette. The color palette has 256 entry's with 4 bytes for each entry.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="stream">The <see cref="Stream"/> to write to.</param>
+        /// <param name="image"> The <see cref="ImageFrame{TPixel}"/> containing pixel data.</param>
+        private void Write8Bit<TPixel>(Stream stream, ImageFrame<TPixel> image)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            bool isGray8 = typeof(TPixel) == typeof(Gray8);
+            using (IMemoryOwner<byte> colorPaletteBuffer = this.memoryAllocator.AllocateManagedByteBuffer(ColorPaletteSize8Bit, AllocationOptions.Clean))
+            {
+                Span<byte> colorPalette = colorPaletteBuffer.GetSpan();
+                if (isGray8)
+                {
+                    this.Write8BitGray(stream, image, colorPalette);
+                }
+                else
+                {
+                    this.Write8BitColor(stream, image, colorPalette);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes an 8 Bit color image with a color palette. The color palette has 256 entry's with 4 bytes for each entry.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="stream">The <see cref="Stream"/> to write to.</param>
+        /// <param name="image"> The <see cref="ImageFrame{TPixel}"/> containing pixel data.</param>
+        /// <param name="colorPalette">A byte span of size 1024 for the color palette.</param>
+        private void Write8BitColor<TPixel>(Stream stream, ImageFrame<TPixel> image, Span<byte> colorPalette)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            using (IQuantizedFrame<TPixel> quantized = this.quantizer.CreateFrameQuantizer<TPixel>(this.configuration, 256).QuantizeFrame(image))
+            {
+                ReadOnlySpan<TPixel> quantizedColors = quantized.Palette.Span;
+                var color = default(Rgba32);
+
+                // TODO: Use bulk conversion here for better perf
+                int idx = 0;
+                foreach (TPixel quantizedColor in quantizedColors)
+                {
+                    quantizedColor.ToRgba32(ref color);
+                    colorPalette[idx] = color.B;
+                    colorPalette[idx + 1] = color.G;
+                    colorPalette[idx + 2] = color.R;
+
+                    // Padding byte, always 0.
+                    colorPalette[idx + 3] = 0;
+                    idx += 4;
+                }
+
+                stream.Write(colorPalette);
+
+                for (int y = image.Height - 1; y >= 0; y--)
+                {
+                    ReadOnlySpan<byte> pixelSpan = quantized.GetRowSpan(y);
+                    stream.Write(pixelSpan);
+
+                    for (int i = 0; i < this.padding; i++)
+                    {
+                        stream.WriteByte(0);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Writes an 8 Bit gray image with a color palette. The color palette has 256 entry's with 4 bytes for each entry.
+        /// </summary>
+        /// <typeparam name="TPixel">The type of the pixel.</typeparam>
+        /// <param name="stream">The <see cref="Stream"/> to write to.</param>
+        /// <param name="image"> The <see cref="ImageFrame{TPixel}"/> containing pixel data.</param>
+        /// <param name="colorPalette">A byte span of size 1024 for the color palette.</param>
+        private void Write8BitGray<TPixel>(Stream stream, ImageFrame<TPixel> image, Span<byte> colorPalette)
+            where TPixel : struct, IPixel<TPixel>
+        {
+            // Create a color palette with 256 different gray values.
+            for (int i = 0; i <= 255; i++)
+            {
+                int idx = i * 4;
+                byte grayValue = (byte)i;
+                colorPalette[idx] = grayValue;
+                colorPalette[idx + 1] = grayValue;
+                colorPalette[idx + 2] = grayValue;
+
+                // Padding byte, always 0.
+                colorPalette[idx + 3] = 0;
+            }
+
+            stream.Write(colorPalette);
+
+            for (int y = image.Height - 1; y >= 0; y--)
+            {
+                ReadOnlySpan<TPixel> inputPixelRow = image.GetPixelRowSpan(y);
+                ReadOnlySpan<byte> outputPixelRow = MemoryMarshal.AsBytes(inputPixelRow);
+                stream.Write(outputPixelRow);
+
+                for (int i = 0; i < this.padding; i++)
+                {
+                    stream.WriteByte(0);
                 }
             }
         }

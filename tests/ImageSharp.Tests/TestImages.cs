@@ -141,6 +141,7 @@ namespace SixLabors.ImageSharp.Tests
                 public const string Testorig420 = "Jpg/baseline/testorig.jpg";
                 public const string MultiScanBaselineCMYK = "Jpg/baseline/MultiScanBaselineCMYK.jpg";
                 public const string Ratio1x1 = "Jpg/baseline/ratio-1x1.jpg";
+                public const string LowContrast = "Jpg/baseline/AsianCarvingLowContrast.jpg";
                 public const string Testorig12bit = "Jpg/baseline/testorig12.jpg";
                 public const string YcckSubsample1222 = "Jpg/baseline/ycck-subsample-1222.jpg";
 
@@ -235,11 +236,13 @@ namespace SixLabors.ImageSharp.Tests
             public const string Bit1Pal1 = "Bmp/pal1p1.bmp";
             public const string Bit4 = "Bmp/pal4.bmp";
             public const string Bit8 = "Bmp/test8.bmp";
+            public const string Bit8Gs = "Bmp/pal8gs.bmp";
             public const string Bit8Inverted = "Bmp/test8-inverted.bmp";
             public const string Bit16 = "Bmp/test16.bmp";
             public const string Bit16Inverted = "Bmp/test16-inverted.bmp";
             public const string Bit32Rgb = "Bmp/rgb32.bmp";
             public const string Bit32Rgba = "Bmp/rgba32.bmp";
+            public const string Rgb16 = "Bmp/rgb16.bmp";
 
             // Note: This format can be called OS/2 BMPv1, or Windows BMPv2
             public const string WinBmpv2 = "Bmp/pal8os2v1_winv2.bmp";
