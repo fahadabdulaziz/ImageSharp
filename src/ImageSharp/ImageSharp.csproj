@@ -10,9 +10,8 @@
 
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
-    <TargetFramework>netstandard2.0</TargetFramework>
 
-    <TargetFrameworks>netcoreapp2.1;netstandard1.3;netstandard2.0;net472</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
       
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -29,47 +28,20 @@
     <DebugSymbols>True</DebugSymbols>
     <Features>IOperation</Features>
     <LangVersion>7.3</LangVersion>
-    <AssemblyVersion>2019.4.2.51</AssemblyVersion>
-    <FileVersion>2019.4.28.51</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
     <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <ShouldCreateLogs>True</ShouldCreateLogs>
-    <AdvancedSettingsExpanded>True</AdvancedSettingsExpanded>
-    <UpdateAssemblyVersion>True</UpdateAssemblyVersion>
-    <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
-    <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
-    <AssemblyVersionSettings>YearStamp.MonthStamp.Increment.Increment</AssemblyVersionSettings>
-    <UpdatePackageVersion>False</UpdatePackageVersion>
-    <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
-    <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
-    <AssemblyFileVersionSettings>YearStamp.MonthStamp.Increment.Increment</AssemblyFileVersionSettings>
-  </PropertyGroup>
-  
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.2" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
-    <AdditionalFiles Include="..\..\standards\stylecop.json" />    
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
     <AdditionalFiles Include="..\..\standards\stylecop.json" />
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
-    <PackageReference Include="SixLabors.Core" Version="1.0.0-dev000101" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3'">
-    <PackageReference Include="System.IO.UnmanagedMemoryStream" Version="4.3.0" />
-    <PackageReference Include="System.IO.Compression" Version="4.3.0" />
-    <PackageReference Include="System.Threading.Tasks.Parallel" Version="4.3.0" />
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
+    <PackageReference Include="System.Memory" Version="4.5.2" />
   </ItemGroup>
 
   <PropertyGroup>
-    <CodeAnalysisRuleSet>..\..\SixLabors.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRuleSet>..\..\standards\SixLabors.ruleset</CodeAnalysisRuleSet>
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
@@ -82,9 +54,6 @@
   <ItemGroup>
     <Reference Include="SixLabors.Core">
       <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="SixLabors.Fonts">
-      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Release\netstandard2.0\SixLabors.Fonts.dll</HintPath>
     </Reference>
   </ItemGroup>
 

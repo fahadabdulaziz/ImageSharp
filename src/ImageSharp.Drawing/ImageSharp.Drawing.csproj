@@ -10,9 +10,8 @@
 
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
-    <TargetFramework>netstandard2.0</TargetFramework>
 
-    <TargetFrameworks>netcoreapp2.1;netstandard1.3;netstandard2.0</TargetFrameworks>
+    <TargetFramework>netstandard2.0</TargetFramework>
     
     <LangVersion>7.3</LangVersion>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -28,8 +27,6 @@
     <DebugType Condition="$(codecov) != ''">full</DebugType>
     <DebugType Condition="$(codecov) == ''">portable</DebugType>
     <DebugSymbols>True</DebugSymbols>
-    <AssemblyVersion>2019.4.2.51</AssemblyVersion>
-    <FileVersion>2019.4.28.51</FileVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -40,32 +37,16 @@
     <ProjectReference Include="..\ImageSharp\ImageSharp.csproj" />
   </ItemGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <ShouldCreateLogs>True</ShouldCreateLogs>
-    <AdvancedSettingsExpanded>True</AdvancedSettingsExpanded>
-    <UpdateAssemblyVersion>True</UpdateAssemblyVersion>
-    <UpdateAssemblyFileVersion>True</UpdateAssemblyFileVersion>
-    <UpdateAssemblyInfoVersion>False</UpdateAssemblyInfoVersion>
-    <AssemblyVersionSettings>YearStamp.MonthStamp.Increment.Increment</AssemblyVersionSettings>
-    <UpdatePackageVersion>False</UpdatePackageVersion>
-    <AssemblyInfoVersionType>SettingsVersion</AssemblyInfoVersionType>
-    <InheritWinAppVersionFrom>None</InheritWinAppVersionFrom>
-    <AssemblyFileVersionSettings>YearStamp.MonthStamp.Increment.Increment</AssemblyFileVersionSettings>
-  </PropertyGroup>
-  
   <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.2" />
-    <PackageReference Include="System.Numerics.Vectors" Version="4.5.0" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
     <AdditionalFiles Include="..\..\standards\stylecop.json" />
   </ItemGroup>
 
   <ItemGroup>
     <Reference Include="SixLabors.Core">
-      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Fonts">
-      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Release\netstandard2.0\SixLabors.Fonts.dll</HintPath>
+      <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Fonts.dll</HintPath>
     </Reference>
     <Reference Include="SixLabors.Shapes">
       <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Shapes.dll</HintPath>
@@ -73,9 +54,6 @@
     <Reference Include="SixLabors.Shapes.Text">
       <HintPath>..\..\..\Shapes\src\SixLabors.Shapes.Text\bin\Release\netstandard2.0\SixLabors.Shapes.Text.dll</HintPath>
     </Reference>
-    <PackageReference Include="StyleCop.Analyzers" Version="1.1.118" PrivateAssets="All" />
-    <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta0008" />
-    <PackageReference Include="SixLabors.Shapes" Version="1.0.0-beta0008" />
   </ItemGroup>
 
   <PropertyGroup>
