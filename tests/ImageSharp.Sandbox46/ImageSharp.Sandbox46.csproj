@@ -1,15 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
-    <TargetFramework>net472</TargetFramework>
-    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
-    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
-    <Prefer32Bit>false</Prefer32Bit>
     <AssemblyName>SixLabors.ImageSharp.Sandbox46</AssemblyName>
     <Description>A cross-platform library for processing of image files written in C#</Description>
-    <Copyright>Copyright © James Jackson-South and contributors.</Copyright>
-    <Authors>James Jackson-South and contributors</Authors>
-    <Company>James Jackson-South</Company>
+    <OutputType>Exe</OutputType>
+    <Prefer32Bit>false</Prefer32Bit>
     <RootNamespace>SixLabors.ImageSharp.Sandbox46</RootNamespace>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
@@ -17,11 +13,14 @@
     <AssemblyVersion>1.0.0.2</AssemblyVersion>
     <FileVersion>2018.10.23.2</FileVersion>
     <LangVersion>7.3</LangVersion>
+    <RuntimeIdentifier>win7-x64</RuntimeIdentifier>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ImageSharp.Drawing\ImageSharp.Drawing.csproj" />
-    <ProjectReference Include="..\..\src\ImageSharp\ImageSharp.csproj" />
+    <Compile Include="..\ImageSharp.Tests\**\*.cs" Link="Tests\%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
+
   <ItemGroup>
     <PackageReference Include="BitMiracle.LibJpeg.NET" Version="1.4.280" />
     <PackageReference Include="xunit" Version="2.3.0-beta4-build3742" />
@@ -30,10 +29,13 @@
     <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="7.9.0.1" />
     <PackageReference Include="xunit" Version="2.3.1" />
     <PackageReference Include="Moq" Version="4.10.0" />
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" />
+    <PackageReference Include="Moq" />
   </ItemGroup>
+
   <ItemGroup>
-    <Compile Include="..\ImageSharp.Tests\**\*.cs" Exclude="bin\**;obj\**" Link="Tests\%(RecursiveDir)%(Filename)%(Extension)" />
-    <Compile Remove="..\ImageSharp.Tests\obj\**\*.cs" />
-    <Compile Remove="..\ImageSharp.Tests\bin\**\*.cs" />
+    <ProjectReference Include="..\..\src\ImageSharp\ImageSharp.csproj" />
+    <ProjectReference Include="..\..\src\ImageSharp.Drawing\ImageSharp.Drawing.csproj" />
   </ItemGroup>
+
 </Project>

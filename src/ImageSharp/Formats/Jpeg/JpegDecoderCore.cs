@@ -1,10 +1,9 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
 using System.Buffers.Binary;
 using System.IO;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using SixLabors.ImageSharp.Common.Helpers;
@@ -726,7 +725,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
             this.InputStream.Read(this.temp, 0, length);
 
             // We only support 8-bit and 12-bit precision.
-            if (!this.supportedPrecisions.Contains(this.temp[0]))
+            if (Array.IndexOf(this.supportedPrecisions, this.temp[0]) == -1)
             {
                 JpegThrowHelper.ThrowImageFormatException("Only 8-Bit and 12-Bit precision supported.");
             }
@@ -953,7 +952,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg
         /// <param name="values">The values</param>
         [MethodImpl(InliningOptions.ShortMethod)]
         private void BuildHuffmanTable(HuffmanTable[] tables, int index, ReadOnlySpan<byte> codeLengths, ReadOnlySpan<byte> values)
-            => tables[index] = new HuffmanTable(this.configuration.MemoryAllocator, codeLengths, values);
+            => tables[index] = new HuffmanTable(codeLengths, values);
 
         /// <summary>
         /// Reads a <see cref="ushort"/> from the stream advancing it by two bytes

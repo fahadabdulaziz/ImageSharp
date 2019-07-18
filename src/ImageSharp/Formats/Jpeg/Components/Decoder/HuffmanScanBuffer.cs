@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System.Runtime.CompilerServices;
@@ -17,47 +17,41 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder
         private ulong data;
 
         // The number of valid bits left to read in the buffer.
-        private int remain;
+        private int remainingBits;
 
-        // Whether there is more data to pull from the stream for the current mcu.
-        private bool noMore;
+        // Whether there is no more good data to pull from the stream for the current mcu.
+        private bool badData;
 
         public HuffmanScanBuffer(DoubleBufferedStreamReader stream)
         {
             this.stream = stream;
             this.data = 0ul;
-            this.remain = 0;
+            this.remainingBits = 0;
             this.Marker = JpegConstants.Markers.XFF;
             this.MarkerPosition = 0;
-            this.BadMarker = false;
-            this.noMore = false;
-            this.Eof = false;
+            this.badData = false;
+            this.NoData = false;
         }
 
         /// <summary>
-        /// Gets or sets the current, if any, marker in the input stream.
+        /// Gets the current, if any, marker in the input stream.
         /// </summary>
-        public byte Marker { get; set; }
+        public byte Marker { get; private set; }
 
         /// <summary>
-        /// Gets or sets the opening position of an identified marker.
+        /// Gets the opening position of an identified marker.
         /// </summary>
-        public long MarkerPosition { get; set; }
+        public long MarkerPosition { get; private set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether we have a bad marker, I.E. One that is not between RST0 and RST7
+        /// Gets a value indicating whether to continue reading the input stream.
         /// </summary>
-        public bool BadMarker { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether we have prematurely reached the end of the file.
-        /// </summary>
-        public bool Eof { get; set; }
+        public bool NoData { get; private set; }
 
         [MethodImpl(InliningOptions.ShortMethod)]
         public void CheckBits()
         {
-            if (this.remain < 16)
+            if (this.remainingBits < 16)
             {
                 this.FillBuffer();
             }
@@ -67,27 +61,31 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder
         public void Reset()
         {
             this.data = 0ul;
-            this.remain = 0;
+            this.remainingBits = 0;
             this.Marker = JpegConstants.Markers.XFF;
             this.MarkerPosition = 0;
-            this.BadMarker = false;
-            this.noMore = false;
-            this.Eof = false;
+            this.badData = false;
+            this.NoData = false;
         }
 
+        /// <summary>
+        /// Whether a RST marker has been detected, I.E. One that is between RST0 and RST7
+        /// </summary>
         [MethodImpl(InliningOptions.ShortMethod)]
-        public bool HasRestart()
-        {
-            byte m = this.Marker;
-            return m >= JpegConstants.Markers.RST0 && m <= JpegConstants.Markers.RST7;
-        }
+        public bool HasRestartMarker() => HasRestart(this.Marker);
+
+        /// <summary>
+        /// Whether a bad marker has been detected, I.E. One that is not between RST0 and RST7
+        /// </summary>
+        [MethodImpl(InliningOptions.ShortMethod)]
+        public bool HasBadMarker() => this.Marker != JpegConstants.Markers.XFF && !this.HasRestartMarker();
 
         [MethodImpl(InliningOptions.ShortMethod)]
         public void FillBuffer()
         {
             // Attempt to load at least the minimum number of required bits into the buffer.
             // We fail to do so only if we hit a marker or reach the end of the input stream.
-            this.remain += 48;
+            this.remainingBits += 48;
             this.data = (this.data << 48) | this.GetBytes();
         }
 
@@ -101,17 +99,17 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder
 
             if (size == JpegConstants.Huffman.SlowBits)
             {
-                ulong x = this.data << (JpegConstants.Huffman.RegisterSize - this.remain);
+                ulong x = this.data << (JpegConstants.Huffman.RegisterSize - this.remainingBits);
                 while (x > h.MaxCode[size])
                 {
                     size++;
                 }
 
                 v = (int)(x >> (JpegConstants.Huffman.RegisterSize - size));
-                symbol = h.Values[h.ValOffset[size] + v];
+                symbol = h.Values[(h.ValOffset[size] + v) & 0xFF];
             }
 
-            this.remain -= size;
+            this.remainingBits -= size;
 
             return symbol;
         }
@@ -124,10 +122,14 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder
         }
 
         [MethodImpl(InliningOptions.ShortMethod)]
-        public int GetBits(int nbits) => (int)ExtractBits(this.data, this.remain -= nbits, nbits);
+        private static bool HasRestart(byte marker)
+            => marker >= JpegConstants.Markers.RST0 && marker <= JpegConstants.Markers.RST7;
 
         [MethodImpl(InliningOptions.ShortMethod)]
-        public int PeekBits(int nbits) => (int)ExtractBits(this.data, this.remain - nbits, nbits);
+        public int GetBits(int nbits) => (int)ExtractBits(this.data, this.remainingBits -= nbits, nbits);
+
+        [MethodImpl(InliningOptions.ShortMethod)]
+        public int PeekBits(int nbits) => (int)ExtractBits(this.data, this.remainingBits - nbits, nbits);
 
         [MethodImpl(InliningOptions.ShortMethod)]
         private static ulong ExtractBits(ulong value, int offset, int size) => (value >> offset) & (ulong)((1 << size) - 1);
@@ -141,41 +143,26 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder
             ulong temp = 0;
             for (int i = 0; i < 6; i++)
             {
-                int b = this.noMore ? 0 : this.stream.ReadByte();
-
-                if (b == -1)
-                {
-                    // We've encountered the end of the file stream which means there's no EOI marker in the image
-                    // or the SOS marker has the wrong dimensions set.
-                    this.Eof = true;
-                    b = 0;
-                }
+                int b = this.ReadStream();
 
                 // Found a marker.
                 if (b == JpegConstants.Markers.XFF)
                 {
-                    this.MarkerPosition = this.stream.Position - 1;
-                    int c = this.stream.ReadByte();
+                    int c = this.ReadStream();
                     while (c == JpegConstants.Markers.XFF)
                     {
-                        c = this.stream.ReadByte();
-
-                        if (c == -1)
-                        {
-                            this.Eof = true;
-                            c = 0;
-                            break;
-                        }
+                        // Loop here to discard any padding FF bytes on terminating marker,
+                        // so that we can save a valid marker value.
+                        c = this.ReadStream();
                     }
 
+                    // We accept multiple FF bytes followed by a 0 as meaning a single FF data byte.
+                    // This data pattern is not valid according to the standard.
                     if (c != 0)
                     {
                         this.Marker = (byte)c;
-                        this.noMore = true;
-                        if (!this.HasRestart())
-                        {
-                            this.BadMarker = true;
-                        }
+                        this.badData = true;
+                        this.MarkerPosition = this.stream.Position - 2;
                     }
                 }
 
@@ -183,6 +170,58 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder
             }
 
             return temp;
+        }
+
+        [MethodImpl(InliningOptions.ShortMethod)]
+        public bool FindNextMarker()
+        {
+            while (true)
+            {
+                int b = this.stream.ReadByte();
+                if (b == -1)
+                {
+                    return false;
+                }
+
+                // Found a marker.
+                if (b == JpegConstants.Markers.XFF)
+                {
+                    while (b == JpegConstants.Markers.XFF)
+                    {
+                        // Loop here to discard any padding FF bytes on terminating marker.
+                        b = this.stream.ReadByte();
+                        if (b == -1)
+                        {
+                            return false;
+                        }
+                    }
+
+                    // Found a valid marker. Exit loop
+                    if (b != 0)
+                    {
+                        this.Marker = (byte)b;
+                        this.badData = true;
+                        this.MarkerPosition = this.stream.Position - 2;
+                        return true;
+                    }
+                }
+            }
+        }
+
+        [MethodImpl(InliningOptions.ShortMethod)]
+        private int ReadStream()
+        {
+            int value = this.badData ? 0 : this.stream.ReadByte();
+            if (value == -1)
+            {
+                // We've encountered the end of the file stream which means there's no EOI marker
+                // in the image or the SOS marker has the wrong dimensions set.
+                this.badData = true;
+                this.NoData = true;
+                value = 0;
+            }
+
+            return value;
         }
     }
 }
