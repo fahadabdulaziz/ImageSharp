@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -6,7 +6,6 @@ using System.Numerics;
 using System.Runtime.CompilerServices;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp.Primitives;
 
 namespace SixLabors.ImageSharp
 {
@@ -43,10 +42,8 @@ namespace SixLabors.ImageSharp
             int maxRow,
             int minColumn,
             int maxColumn)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
-            Vector4 vector = default;
-
             Convolve2DImpl(
                 in matrixY,
                 in matrixX,
@@ -57,7 +54,7 @@ namespace SixLabors.ImageSharp
                 maxRow,
                 minColumn,
                 maxColumn,
-                ref vector);
+                out Vector4 vector);
 
             ref Vector4 target = ref Unsafe.Add(ref targetRowRef, column);
             vector.W = target.W;
@@ -93,10 +90,8 @@ namespace SixLabors.ImageSharp
             int maxRow,
             int minColumn,
             int maxColumn)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
-            Vector4 vector = default;
-
             Convolve2DImpl(
                 in matrixY,
                 in matrixX,
@@ -107,7 +102,7 @@ namespace SixLabors.ImageSharp
                 maxRow,
                 minColumn,
                 maxColumn,
-                ref vector);
+                out Vector4 vector);
 
             ref Vector4 target = ref Unsafe.Add(ref targetRowRef, column);
             Vector4Utils.UnPremultiply(ref vector);
@@ -125,8 +120,8 @@ namespace SixLabors.ImageSharp
             int maxRow,
             int minColumn,
             int maxColumn,
-            ref Vector4 vector)
-            where TPixel : struct, IPixel<TPixel>
+            out Vector4 vector)
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Vector4 vectorY = default;
             Vector4 vectorX = default;
@@ -180,7 +175,7 @@ namespace SixLabors.ImageSharp
             int maxRow,
             int minColumn,
             int maxColumn)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Vector4 vector = default;
 
@@ -227,7 +222,7 @@ namespace SixLabors.ImageSharp
             int maxRow,
             int minColumn,
             int maxColumn)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Vector4 vector = default;
 
@@ -258,7 +253,7 @@ namespace SixLabors.ImageSharp
             int minColumn,
             int maxColumn,
             ref Vector4 vector)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             int matrixHeight = matrix.Rows;
             int matrixWidth = matrix.Columns;

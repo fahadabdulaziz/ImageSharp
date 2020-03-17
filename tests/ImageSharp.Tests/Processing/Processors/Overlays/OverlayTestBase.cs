@@ -1,12 +1,9 @@
 // Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
-using System.Reflection;
-
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Tests.TestUtilities.ImageComparison;
-using SixLabors.Primitives;
 
 using Xunit;
 
@@ -20,11 +17,11 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Overlays
         public static string[] InputImages = { TestImages.Png.Ducky, TestImages.Png.Splash };
 
         private static readonly ImageComparer ValidatorComparer = ImageComparer.TolerantPercentage(0.05f);
-        
+
         [Theory]
         [WithFileCollection(nameof(InputImages), nameof(ColorNames), PixelTypes.Rgba32)]
         public void FullImage_ApplyColor<TPixel>(TestImageProvider<TPixel> provider, string colorName)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             provider.Utility.TestGroupName = this.GetType().Name;
             Color color = TestUtils.GetColorByName(colorName);
@@ -35,7 +32,7 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Overlays
         [Theory]
         [WithFileCollection(nameof(InputImages), PixelTypes.Rgba32)]
         public void FullImage_ApplyRadius<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             provider.Utility.TestGroupName = this.GetType().Name;
             provider.RunValidatingProcessorTest(
@@ -51,16 +48,24 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Overlays
         [Theory]
         [WithFileCollection(nameof(InputImages), PixelTypes.Rgba32)]
         public void InBox<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             provider.Utility.TestGroupName = this.GetType().Name;
-            provider.RunRectangleConstrainedValidatingProcessorTest((x, rect) => this.Apply(x, rect));
+            provider.RunRectangleConstrainedValidatingProcessorTest(this.Apply);
+        }
+
+        [Theory]
+        [WithTestPatternImages(70, 120, PixelTypes.Rgba32)]
+        public void WorksWithDiscoBuffers<TPixel>(TestImageProvider<TPixel> provider)
+            where TPixel : unmanaged, IPixel<TPixel>
+        {
+            provider.RunBufferCapacityLimitProcessorTest(37, c => this.Apply(c, Color.DarkRed));
         }
 
         protected abstract void Apply(IImageProcessingContext ctx, Color color);
-        
+
         protected abstract void Apply(IImageProcessingContext ctx, float radiusX, float radiusY);
-        
+
         protected abstract void Apply(IImageProcessingContext ctx, Rectangle rect);
     }
 }

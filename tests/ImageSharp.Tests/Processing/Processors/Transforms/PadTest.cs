@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using SixLabors.ImageSharp.PixelFormats;
@@ -17,7 +17,7 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Transforms
         [Theory]
         [WithFileCollection(nameof(CommonTestImages), PixelTypes.Rgba32)]
         public void ImageShouldPad<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             using (Image<TPixel> image = provider.GetImage())
             {
@@ -38,9 +38,9 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Transforms
         [Theory]
         [WithFileCollection(nameof(CommonTestImages), PixelTypes.Rgba32)]
         public void ImageShouldPadWithBackgroundColor<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
-            Color color = Color.Red;
+            var color = Color.Red;
             TPixel expected = color.ToPixel<TPixel>();
             using (Image<TPixel> image = provider.GetImage())
             {

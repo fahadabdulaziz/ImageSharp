@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -13,12 +13,12 @@ using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using Xunit;
 
-
 namespace SixLabors.ImageSharp.Tests
 {
     public class ImageFormatManagerTests
     {
         public ImageFormatManager FormatsManagerEmpty { get; }
+
         public ImageFormatManager DefaultFormatsManager { get; }
 
         public ImageFormatManagerTests()
@@ -28,7 +28,7 @@ namespace SixLabors.ImageSharp.Tests
         }
 
         [Fact]
-        public void IfAutoloadWellKnownFormatsIsTrueAllFormatsAreLoaded()
+        public void IfAutoLoadWellKnownFormatsIsTrueAllFormatsAreLoaded()
         {
             Assert.Equal(1, this.DefaultFormatsManager.ImageEncoders.Select(item => item.Value).OfType<PngEncoder>().Count());
             Assert.Equal(1, this.DefaultFormatsManager.ImageEncoders.Select(item => item.Value).OfType<BmpEncoder>().Count());
@@ -42,7 +42,7 @@ namespace SixLabors.ImageSharp.Tests
         }
 
         [Fact]
-        public void AddImageFormatDetectorNullthrows()
+        public void AddImageFormatDetectorNullThrows()
         {
             Assert.Throws<ArgumentNullException>(() =>
             {

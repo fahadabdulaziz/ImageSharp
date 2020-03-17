@@ -2,13 +2,10 @@
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
-
+using System.Runtime.CompilerServices;
 using SixLabors.ImageSharp.Advanced;
-using SixLabors.ImageSharp.ParallelUtils;
+using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.Primitives;
 
 namespace SixLabors.ImageSharp.Processing.Processors.Transforms
 {
@@ -17,64 +14,82 @@ namespace SixLabors.ImageSharp.Processing.Processors.Transforms
     /// </summary>
     /// <typeparam name="TPixel">The pixel format.</typeparam>
     internal class CropProcessor<TPixel> : TransformProcessor<TPixel>
-        where TPixel : struct, IPixel<TPixel>
+        where TPixel : unmanaged, IPixel<TPixel>
     {
-        private readonly CropProcessor definition;
+        private readonly Rectangle cropRectangle;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CropProcessor{TPixel}"/> class.
         /// </summary>
+        /// <param name="configuration">The configuration which allows altering default behaviour or extending the library.</param>
         /// <param name="definition">The <see cref="CropProcessor"/>.</param>
-        public CropProcessor(CropProcessor definition)
-        {
-            this.definition = definition;
-        }
-
-        private Rectangle CropRectangle => this.definition.CropRectangle;
-
-        /// <inheritdoc/>
-        protected override Image<TPixel> CreateDestination(Image<TPixel> source, Rectangle sourceRectangle)
-        {
-            // We will always be creating the clone even for mutate because we may need to resize the canvas
-            IEnumerable<ImageFrame<TPixel>> frames = source.Frames.Select<ImageFrame<TPixel>, ImageFrame<TPixel>>(
-                x => new ImageFrame<TPixel>(
-                    source.GetConfiguration(),
-                    this.CropRectangle.Width,
-                    this.CropRectangle.Height,
-                    x.Metadata.DeepClone()));
-
-            // Use the overload to prevent an extra frame being added
-            return new Image<TPixel>(source.GetConfiguration(), source.Metadata.DeepClone(), frames);
-        }
+        /// <param name="source">The source <see cref="Image{TPixel}"/> for the current processor instance.</param>
+        /// <param name="sourceRectangle">The source area to process for the current processor instance.</param>
+        public CropProcessor(Configuration configuration, CropProcessor definition, Image<TPixel> source, Rectangle sourceRectangle)
+            : base(configuration, source, sourceRectangle)
+            => this.cropRectangle = definition.CropRectangle;
 
         /// <inheritdoc/>
-        protected override void OnFrameApply(ImageFrame<TPixel> source, ImageFrame<TPixel> destination, Rectangle sourceRectangle, Configuration configuration)
+        protected override Size GetDestinationSize() => new Size(this.cropRectangle.Width, this.cropRectangle.Height);
+
+        /// <inheritdoc/>
+        protected override void OnFrameApply(ImageFrame<TPixel> source, ImageFrame<TPixel> destination)
         {
-            // Handle resize dimensions identical to the original
-            if (source.Width == destination.Width && source.Height == destination.Height && sourceRectangle == this.CropRectangle)
+            // Handle crop dimensions identical to the original
+            if (source.Width == destination.Width
+                && source.Height == destination.Height
+                && this.SourceRectangle == this.cropRectangle)
             {
                 // the cloned will be blank here copy all the pixel data over
-                source.GetPixelSpan().CopyTo(destination.GetPixelSpan());
+                source.GetPixelMemoryGroup().CopyTo(destination.GetPixelMemoryGroup());
                 return;
             }
 
-            Rectangle rect = this.CropRectangle;
+            Rectangle bounds = this.cropRectangle;
 
             // Copying is cheap, we should process more pixels per task:
-            ParallelExecutionSettings parallelSettings = configuration.GetParallelSettings().MultiplyMinimumPixelsPerTask(4);
+            ParallelExecutionSettings parallelSettings =
+                ParallelExecutionSettings.FromConfiguration(this.Configuration).MultiplyMinimumPixelsPerTask(4);
 
-            ParallelHelper.IterateRows(
-                rect,
-                parallelSettings,
-                rows =>
-                    {
-                        for (int y = rows.Min; y < rows.Max; y++)
-                        {
-                            Span<TPixel> sourceRow = source.GetPixelRowSpan(y).Slice(rect.Left);
-                            Span<TPixel> targetRow = destination.GetPixelRowSpan(y - rect.Top);
-                            sourceRow.Slice(0, rect.Width).CopyTo(targetRow);
-                        }
-                    });
+            var operation = new RowOperation(bounds, source, destination);
+
+            ParallelRowIterator.IterateRows(
+                bounds,
+                in parallelSettings,
+                in operation);
+        }
+
+        /// <summary>
+        /// A <see langword="struct"/> implementing the processor logic for <see cref="CropProcessor{T}"/>.
+        /// </summary>
+        private readonly struct RowOperation : IRowOperation
+        {
+            private readonly Rectangle bounds;
+            private readonly ImageFrame<TPixel> source;
+            private readonly ImageFrame<TPixel> destination;
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="RowOperation"/> struct.
+            /// </summary>
+            /// <param name="bounds">The target processing bounds for the current instance.</param>
+            /// <param name="source">The source <see cref="Image{TPixel}"/> for the current instance.</param>
+            /// <param name="destination">The destination <see cref="Image{TPixel}"/> for the current instance.</param>
+            [MethodImpl(InliningOptions.ShortMethod)]
+            public RowOperation(Rectangle bounds, ImageFrame<TPixel> source, ImageFrame<TPixel> destination)
+            {
+                this.bounds = bounds;
+                this.source = source;
+                this.destination = destination;
+            }
+
+            /// <inheritdoc/>
+            [MethodImpl(InliningOptions.ShortMethod)]
+            public void Invoke(int y)
+            {
+                Span<TPixel> sourceRow = this.source.GetPixelRowSpan(y).Slice(this.bounds.Left);
+                Span<TPixel> targetRow = this.destination.GetPixelRowSpan(y - this.bounds.Top);
+                sourceRow.Slice(0, this.bounds.Width).CopyTo(targetRow);
+            }
         }
     }
 }

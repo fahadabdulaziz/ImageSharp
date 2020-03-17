@@ -14,7 +14,7 @@ namespace SixLabors.ImageSharp.Tests.PixelFormats
         {
             var color1 = new Bgr24(byte.MaxValue, 0, byte.MaxValue);
             var color2 = new Bgr24(byte.MaxValue, 0, byte.MaxValue);
-            
+
             Assert.Equal(color1, color2);
         }
 
@@ -28,7 +28,7 @@ namespace SixLabors.ImageSharp.Tests.PixelFormats
         }
 
         public static readonly TheoryData<byte, byte, byte> ColorData =
-            new TheoryData<byte, byte, byte>() { { 1, 2, 3 }, { 4, 5, 6 }, { 0, 255, 42 } };
+            new TheoryData<byte, byte, byte> { { 1, 2, 3 }, { 4, 5, 6 }, { 0, 255, 42 } };
 
         [Theory]
         [MemberData(nameof(ColorData))]
@@ -76,7 +76,6 @@ namespace SixLabors.ImageSharp.Tests.PixelFormats
             Assert.False(a.Equals(b));
             Assert.False(a.Equals((object)b));
         }
-
 
         [Fact]
         public void FromRgba32()

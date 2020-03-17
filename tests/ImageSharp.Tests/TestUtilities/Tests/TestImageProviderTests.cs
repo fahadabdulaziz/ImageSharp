@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -14,23 +14,21 @@ using Xunit;
 using Xunit.Abstractions;
 
 // ReSharper disable InconsistentNaming
-
 namespace SixLabors.ImageSharp.Tests
 {
     public class TestImageProviderTests
     {
-        public static readonly TheoryData<object> BasicData = new TheoryData<object>()
-                                                                  {
-                                                                      TestImageProvider<Rgba32>.Blank(10, 20),
-                                                                      TestImageProvider<HalfVector4>.Blank(10, 20),
-                                                                  };
+        public static readonly TheoryData<object> BasicData = new TheoryData<object>
+        {
+            TestImageProvider<Rgba32>.Blank(10, 20),
+            TestImageProvider<HalfVector4>.Blank(10, 20),
+        };
 
-        public static readonly TheoryData<object> FileData = new TheoryData<object>()
-                                                                 {
-                                                                     TestImageProvider<Rgba32>.File(TestImages.Bmp.Car),
-                                                                     TestImageProvider<HalfVector4>.File(
-                                                                         TestImages.Bmp.F)
-                                                                 };
+        public static readonly TheoryData<object> FileData = new TheoryData<object>
+        {
+            TestImageProvider<Rgba32>.File(TestImages.Bmp.Car),
+            TestImageProvider<HalfVector4>.File(TestImages.Bmp.F)
+        };
 
         public static string[] AllBmpFiles = { TestImages.Bmp.F, TestImages.Bmp.Bit8 };
 
@@ -41,17 +39,16 @@ namespace SixLabors.ImageSharp.Tests
         /// <summary>
         /// Need to us <see cref="GenericFactory{TPixel}"/> to create instance of <see cref="Image"/> when pixelType is StandardImageClass
         /// </summary>
-        /// <typeparam name="TPixel"></typeparam>
-        /// <param name="factory"></param>
-        /// <returns></returns>
+        /// <typeparam name="TPixel">The pixel type of the image.</typeparam>
+        /// <returns>A test image.</returns>
         public static Image<TPixel> CreateTestImage<TPixel>()
-            where TPixel : struct, IPixel<TPixel> =>
+            where TPixel : unmanaged, IPixel<TPixel> =>
             new Image<TPixel>(3, 3);
 
         [Theory]
         [MemberData(nameof(BasicData))]
         public void Blank_MemberData<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Image<TPixel> img = provider.GetImage();
 
@@ -61,7 +58,7 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [MemberData(nameof(FileData))]
         public void File_MemberData<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             this.Output.WriteLine("SRC: " + provider.Utility.SourceFileOrDescription);
             this.Output.WriteLine("OUT: " + provider.Utility.GetTestOutputFileName());
@@ -75,7 +72,7 @@ namespace SixLabors.ImageSharp.Tests
         [WithFile(TestImages.Bmp.F, PixelTypes.Rgba32)]
         public void GetImage_WithCustomParameterlessDecoder_ShouldUtilizeCache<TPixel>(
             TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             if (!TestEnvironment.Is64BitProcess)
             {
@@ -105,7 +102,7 @@ namespace SixLabors.ImageSharp.Tests
         [WithFile(TestImages.Bmp.F, PixelTypes.Rgba32)]
         public void GetImage_WithCustomParametricDecoder_ShouldNotUtilizeCache_WhenParametersAreNotEqual<TPixel>(
             TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Assert.NotNull(provider.Utility.SourceFileOrDescription);
 
@@ -115,10 +112,10 @@ namespace SixLabors.ImageSharp.Tests
                         string testName = nameof(this
                             .GetImage_WithCustomParametricDecoder_ShouldNotUtilizeCache_WhenParametersAreNotEqual);
 
-                        var decoder1 = new TestDecoderWithParameters() { Param1 = "Lol", Param2 = 42 };
+                        var decoder1 = new TestDecoderWithParameters { Param1 = "Lol", Param2 = 42 };
                         decoder1.InitCaller(testName);
 
-                        var decoder2 = new TestDecoderWithParameters() { Param1 = "LoL", Param2 = 42 };
+                        var decoder2 = new TestDecoderWithParameters { Param1 = "LoL", Param2 = 42 };
                         decoder2.InitCaller(testName);
 
                         provider.GetImage(decoder1);
@@ -133,7 +130,7 @@ namespace SixLabors.ImageSharp.Tests
         [WithFile(TestImages.Bmp.F, PixelTypes.Rgba32)]
         public void GetImage_WithCustomParametricDecoder_ShouldUtilizeCache_WhenParametersAreEqual<TPixel>(
             TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             if (!TestEnvironment.Is64BitProcess)
             {
@@ -149,10 +146,10 @@ namespace SixLabors.ImageSharp.Tests
                         string testName = nameof(this
                             .GetImage_WithCustomParametricDecoder_ShouldUtilizeCache_WhenParametersAreEqual);
 
-                        var decoder1 = new TestDecoderWithParameters() { Param1 = "Lol", Param2 = 666 };
+                        var decoder1 = new TestDecoderWithParameters { Param1 = "Lol", Param2 = 666 };
                         decoder1.InitCaller(testName);
 
-                        var decoder2 = new TestDecoderWithParameters() { Param1 = "Lol", Param2 = 666 };
+                        var decoder2 = new TestDecoderWithParameters { Param1 = "Lol", Param2 = 666 };
                         decoder2.InitCaller(testName);
 
                         provider.GetImage(decoder1);
@@ -166,21 +163,21 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithBlankImages(1, 1, PixelTypes.Rgba32)]
         public void NoOutputSubfolderIsPresentByDefault<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel> =>
+            where TPixel : unmanaged, IPixel<TPixel> =>
             Assert.Empty(provider.Utility.OutputSubfolderName);
 
         [Theory]
         [WithBlankImages(1, 1, PixelTypes.Rgba32, PixelTypes.Rgba32)]
-        [WithBlankImages(1, 1, PixelTypes.Alpha8, PixelTypes.Alpha8)]
+        [WithBlankImages(1, 1, PixelTypes.A8, PixelTypes.A8)]
         [WithBlankImages(1, 1, PixelTypes.Argb32, PixelTypes.Argb32)]
         public void PixelType_PropertyValueIsCorrect<TPixel>(TestImageProvider<TPixel> provider, PixelTypes expected)
-            where TPixel : struct, IPixel<TPixel> =>
+            where TPixel : unmanaged, IPixel<TPixel> =>
             Assert.Equal(expected, provider.PixelType);
 
         [Theory]
         [WithFile(TestImages.Gif.Giphy, PixelTypes.Rgba32)]
         public void SaveTestOutputFileMultiFrame<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             using (Image<TPixel> image = provider.GetImage())
             {
@@ -200,7 +197,7 @@ namespace SixLabors.ImageSharp.Tests
         [WithBasicTestPatternImages(49, 17, PixelTypes.Rgba32)]
         [WithBasicTestPatternImages(20, 10, PixelTypes.Rgba32)]
         public void Use_WithBasicTestPatternImages<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             using (Image<TPixel> img = provider.GetImage())
             {
@@ -213,7 +210,7 @@ namespace SixLabors.ImageSharp.Tests
         public void Use_WithBlankImagesAttribute_WithAllPixelTypes<TPixel>(
             TestImageProvider<TPixel> provider,
             string message)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Image<TPixel> img = provider.GetImage();
 
@@ -225,7 +222,7 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithBlankImages(42, 666, PixelTypes.Rgba32 | PixelTypes.Argb32 | PixelTypes.HalfSingle, "hello")]
         public void Use_WithEmptyImageAttribute<TPixel>(TestImageProvider<TPixel> provider, string message)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Image<TPixel> img = provider.GetImage();
 
@@ -238,7 +235,7 @@ namespace SixLabors.ImageSharp.Tests
         [WithFile(TestImages.Bmp.Car, PixelTypes.All, 123)]
         [WithFile(TestImages.Bmp.F, PixelTypes.All, 123)]
         public void Use_WithFileAttribute<TPixel>(TestImageProvider<TPixel> provider, int yo)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Assert.NotNull(provider.Utility.SourceFileOrDescription);
             using (Image<TPixel> img = provider.GetImage())
@@ -255,7 +252,7 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithFile(TestImages.Jpeg.Baseline.Testorig420, PixelTypes.Rgba32)]
         public void Use_WithFileAttribute_CustomConfig<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             EnsureCustomConfigurationIsApplied(provider);
         }
@@ -263,7 +260,7 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithFileCollection(nameof(AllBmpFiles), PixelTypes.Rgba32 | PixelTypes.Argb32)]
         public void Use_WithFileCollection<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Assert.NotNull(provider.Utility.SourceFileOrDescription);
             using (Image<TPixel> image = provider.GetImage())
@@ -275,7 +272,7 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithMemberFactory(nameof(CreateTestImage), PixelTypes.All)]
         public void Use_WithMemberFactoryAttribute<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Image<TPixel> img = provider.GetImage();
             Assert.Equal(3, img.Width);
@@ -288,7 +285,7 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithSolidFilledImages(10, 20, 255, 100, 50, 200, PixelTypes.Rgba32 | PixelTypes.Argb32)]
         public void Use_WithSolidFilledImagesAttribute<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Image<TPixel> img = provider.GetImage();
             Assert.Equal(10, img.Width);
@@ -313,32 +310,32 @@ namespace SixLabors.ImageSharp.Tests
         [Theory]
         [WithTestPatternImages(49, 20, PixelTypes.Rgba32)]
         public void Use_WithTestPatternImages<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             using (Image<TPixel> img = provider.GetImage())
             {
                 img.DebugSave(provider);
             }
         }
-        
+
         [Theory]
         [WithTestPatternImages(20, 20, PixelTypes.Rgba32)]
         public void Use_WithTestPatternImages_CustomConfiguration<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             EnsureCustomConfigurationIsApplied(provider);
         }
 
         private static void EnsureCustomConfigurationIsApplied<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
-            using (var image1 = provider.GetImage())
+            using (provider.GetImage())
             {
                 var customConfiguration = Configuration.CreateDefaultInstance();
                 provider.Configuration = customConfiguration;
 
-                using (var image2 = provider.GetImage())
-                using (var image3 = provider.GetImage())
+                using (Image<TPixel> image2 = provider.GetImage())
+                using (Image<TPixel> image3 = provider.GetImage())
                 {
                     Assert.Same(customConfiguration, image2.GetConfiguration());
                     Assert.Same(customConfiguration, image3.GetConfiguration());
@@ -349,13 +346,12 @@ namespace SixLabors.ImageSharp.Tests
         private class TestDecoder : IImageDecoder
         {
             // Couldn't make xUnit happy without this hackery:
-
-            private static readonly ConcurrentDictionary<string, int> invocationCounts =
+            private static readonly ConcurrentDictionary<string, int> InvocationCounts =
                 new ConcurrentDictionary<string, int>();
 
             private static readonly object Monitor = new object();
 
-            private string callerName = null;
+            private string callerName;
 
             public static void DoTestThreadSafe(Action action)
             {
@@ -366,31 +362,31 @@ namespace SixLabors.ImageSharp.Tests
             }
 
             public Image<TPixel> Decode<TPixel>(Configuration configuration, Stream stream)
-                where TPixel : struct, IPixel<TPixel>
+                where TPixel : unmanaged, IPixel<TPixel>
             {
-                invocationCounts[this.callerName]++;
+                InvocationCounts[this.callerName]++;
                 return new Image<TPixel>(42, 42);
             }
 
-            internal static int GetInvocationCount(string callerName) => invocationCounts[callerName];
+            internal static int GetInvocationCount(string callerName) => InvocationCounts[callerName];
 
             internal void InitCaller(string name)
             {
                 this.callerName = name;
-                invocationCounts[name] = 0;
+                InvocationCounts[name] = 0;
             }
-            
+
             public Image Decode(Configuration configuration, Stream stream) => this.Decode<Rgba32>(configuration, stream);
         }
 
         private class TestDecoderWithParameters : IImageDecoder
         {
-            private static readonly ConcurrentDictionary<string, int> invocationCounts =
+            private static readonly ConcurrentDictionary<string, int> InvocationCounts =
                 new ConcurrentDictionary<string, int>();
 
             private static readonly object Monitor = new object();
 
-            private string callerName = null;
+            private string callerName;
 
             public string Param1 { get; set; }
 
@@ -405,20 +401,20 @@ namespace SixLabors.ImageSharp.Tests
             }
 
             public Image<TPixel> Decode<TPixel>(Configuration configuration, Stream stream)
-                where TPixel : struct, IPixel<TPixel>
+                where TPixel : unmanaged, IPixel<TPixel>
             {
-                invocationCounts[this.callerName]++;
+                InvocationCounts[this.callerName]++;
                 return new Image<TPixel>(42, 42);
             }
 
-            internal static int GetInvocationCount(string callerName) => invocationCounts[callerName];
+            internal static int GetInvocationCount(string callerName) => InvocationCounts[callerName];
 
             internal void InitCaller(string name)
             {
                 this.callerName = name;
-                invocationCounts[name] = 0;
+                InvocationCounts[name] = 0;
             }
-            
+
             public Image Decode(Configuration configuration, Stream stream) => this.Decode<Rgba32>(configuration, stream);
         }
     }

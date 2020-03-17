@@ -4,8 +4,6 @@
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Tests.TestUtilities.ImageComparison;
-
-using SixLabors.Primitives;
 using Xunit;
 
 namespace SixLabors.ImageSharp.Tests.Processing.Processors.Effects
@@ -15,9 +13,10 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Effects
     {
         public static readonly TheoryData<int, int> OilPaintValues = new TheoryData<int, int>
                                                                          {
-                                                                             { 15, 10 }, 
+                                                                             { 15, 10 },
                                                                              { 6, 5 }
                                                                          };
+
         public static readonly string[] InputImages =
             {
                 TestImages.Png.CalliphoraPartial,
@@ -27,11 +26,15 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Effects
         [Theory]
         [WithFileCollection(nameof(InputImages), nameof(OilPaintValues), PixelTypes.Rgba32)]
         public void FullImage<TPixel>(TestImageProvider<TPixel> provider, int levels, int brushSize)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             provider.RunValidatingProcessorTest(
-                x => x.OilPaint(levels, brushSize),
-                $"{levels}-{brushSize}",
+                x =>
+                {
+                    x.OilPaint(levels, brushSize);
+                    return $"{levels}-{brushSize}";
+                },
+                ImageComparer.TolerantPercentage(0.01F),
                 appendPixelTypeToFileName: false);
         }
 
@@ -39,11 +42,12 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Effects
         [WithFileCollection(nameof(InputImages), nameof(OilPaintValues), PixelTypes.Rgba32)]
         [WithTestPatternImages(nameof(OilPaintValues), 100, 100, PixelTypes.Rgba32)]
         public void InBox<TPixel>(TestImageProvider<TPixel> provider, int levels, int brushSize)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             provider.RunRectangleConstrainedValidatingProcessorTest(
                 (x, rect) => x.OilPaint(levels, brushSize, rect),
-                $"{levels}-{brushSize}");
+                $"{levels}-{brushSize}",
+                ImageComparer.TolerantPercentage(0.01F));
         }
     }
 }

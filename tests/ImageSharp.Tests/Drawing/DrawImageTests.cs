@@ -1,15 +1,12 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
-
-using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Formats.Png;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Tests.TestUtilities.ImageComparison;
-using SixLabors.Primitives;
-using SixLabors.Shapes;
 
 using Xunit;
 
@@ -34,7 +31,7 @@ namespace SixLabors.ImageSharp.Tests.Drawing
         [Theory]
         [WithFile(TestImages.Png.Rainbow, nameof(BlendingModes), PixelTypes.Rgba32)]
         public void ImageBlendingMatchesSvgSpecExamples<TPixel>(TestImageProvider<TPixel> provider, PixelColorBlendingMode mode)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             using (Image<TPixel> background = provider.GetImage())
             using (var source = Image.Load<TPixel>(TestFile.Create(TestImages.Png.Ducky).Bytes))
@@ -47,7 +44,8 @@ namespace SixLabors.ImageSharp.Tests.Drawing
                     appendSourceFileOrDescription: false);
 
                 var comparer = ImageComparer.TolerantPercentage(0.01F);
-                background.CompareToReferenceOutput(comparer,
+                background.CompareToReferenceOutput(
+                    comparer,
                     provider,
                     new { mode = mode },
                     appendPixelTypeToFileName: false,
@@ -72,18 +70,18 @@ namespace SixLabors.ImageSharp.Tests.Drawing
             string brushImage,
             PixelColorBlendingMode mode,
             float opacity)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             using (Image<TPixel> image = provider.GetImage())
             using (var blend = Image.Load<TPixel>(TestFile.Create(brushImage).Bytes))
             {
-                Size size = new Size(image.Width * 3 / 4, image.Height * 3 / 4);
-                Point position = new Point(image.Width / 8, image.Height / 8);
+                var size = new Size(image.Width * 3 / 4, image.Height * 3 / 4);
+                var position = new Point(image.Width / 8, image.Height / 8);
                 blend.Mutate(x => x.Resize(size.Width, size.Height, KnownResamplers.Bicubic));
                 image.Mutate(x => x.DrawImage(blend, position, mode, opacity));
                 FormattableString testInfo = $"{System.IO.Path.GetFileNameWithoutExtension(brushImage)}-{mode}-{opacity}";
 
-                PngEncoder encoder = new PngEncoder();
+                var encoder = new PngEncoder();
 
                 if (provider.PixelType == PixelTypes.Rgba64)
                 {
@@ -91,7 +89,8 @@ namespace SixLabors.ImageSharp.Tests.Drawing
                 }
 
                 image.DebugSave(provider, testInfo, encoder: encoder);
-                image.CompareToReferenceOutput(ImageComparer.TolerantPercentage(0.01f),
+                image.CompareToReferenceOutput(
+                    ImageComparer.TolerantPercentage(0.01f),
                     provider,
                     testInfo);
             }
@@ -100,7 +99,7 @@ namespace SixLabors.ImageSharp.Tests.Drawing
         [Theory]
         [WithTestPatternImages(200, 200, PixelTypes.Rgba32 | PixelTypes.Bgra32)]
         public void DrawImageOfDifferentPixelType<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             byte[] brushData = TestFile.Create(TestImages.Png.Ducky).Bytes;
 
@@ -129,7 +128,7 @@ namespace SixLabors.ImageSharp.Tests.Drawing
             using (Image<Rgba32> background = provider.GetImage())
             using (var overlay = new Image<Rgba32>(50, 50))
             {
-                overlay.Mutate(c => c.Fill(Rgba32.Black));
+                overlay.GetPixelSpan().Fill(Color.Black);
 
                 background.Mutate(c => c.DrawImage(overlay, new Point(x, y), PixelColorBlendingMode.Normal, 1F));
 
@@ -150,7 +149,7 @@ namespace SixLabors.ImageSharp.Tests.Drawing
         [Theory]
         [WithFile(TestImages.Png.Splash, PixelTypes.Rgba32)]
         public void DrawTransformed<TPixel>(TestImageProvider<TPixel> provider)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             using (Image<TPixel> image = provider.GetImage())
             using (var blend = Image.Load<TPixel>(TestFile.Create(TestImages.Bmp.Car).Bytes))
@@ -169,7 +168,8 @@ namespace SixLabors.ImageSharp.Tests.Drawing
                 image.Mutate(x => x.DrawImage(blend, position, .75F));
 
                 image.DebugSave(provider, appendSourceFileOrDescription: false, appendPixelTypeToFileName: false);
-                image.CompareToReferenceOutput(ImageComparer.TolerantPercentage(0.002f),
+                image.CompareToReferenceOutput(
+                    ImageComparer.TolerantPercentage(0.002f),
                     provider,
                     appendSourceFileOrDescription: false,
                     appendPixelTypeToFileName: false);
@@ -184,7 +184,7 @@ namespace SixLabors.ImageSharp.Tests.Drawing
         public void NonOverlappingImageThrows(TestImageProvider<Rgba32> provider, int x, int y)
         {
             using (Image<Rgba32> background = provider.GetImage())
-            using (var overlay = new Image<Rgba32>(Configuration.Default, 10, 10, Rgba32.Black))
+            using (var overlay = new Image<Rgba32>(Configuration.Default, 10, 10, Color.Black))
             {
                 ImageProcessingException ex = Assert.Throws<ImageProcessingException>(Test);
 
@@ -192,11 +192,9 @@ namespace SixLabors.ImageSharp.Tests.Drawing
 
                 void Test()
                 {
-                    background.Mutate(context => context.DrawImage(overlay, new Point(x, y), GraphicsOptions.Default));
+                    background.Mutate(context => context.DrawImage(overlay, new Point(x, y), new GraphicsOptions()));
                 }
             }
         }
-
-
     }
 }

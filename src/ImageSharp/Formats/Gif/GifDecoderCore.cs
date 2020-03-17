@@ -1,4 +1,4 @@
-﻿// Copyright (c) Six Labors and contributors.
+// Copyright (c) Six Labors and contributors.
 // Licensed under the Apache License, Version 2.0.
 
 using System;
@@ -10,8 +10,6 @@ using SixLabors.ImageSharp.Advanced;
 using SixLabors.ImageSharp.Memory;
 using SixLabors.ImageSharp.Metadata;
 using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.Memory;
-using SixLabors.Primitives;
 
 namespace SixLabors.ImageSharp.Formats.Gif
 {
@@ -77,7 +75,6 @@ namespace SixLabors.ImageSharp.Formats.Gif
         /// <param name="options">The decoder options.</param>
         public GifDecoderCore(Configuration configuration, IGifDecoderOptions options)
         {
-            this.TextEncoding = options.TextEncoding ?? GifConstants.DefaultEncoding;
             this.IgnoreMetadata = options.IgnoreMetadata;
             this.DecodingMode = options.DecodingMode;
             this.configuration = configuration ?? Configuration.Default;
@@ -89,14 +86,14 @@ namespace SixLabors.ImageSharp.Formats.Gif
         public bool IgnoreMetadata { get; internal set; }
 
         /// <summary>
-        /// Gets the text encoding
-        /// </summary>
-        public Encoding TextEncoding { get; }
-
-        /// <summary>
-        /// Gets the decoding mode for multi-frame images
+        /// Gets the decoding mode for multi-frame images.
         /// </summary>
         public FrameDecodingMode DecodingMode { get; }
+
+        /// <summary>
+        /// Gets the dimensions of the image.
+        /// </summary>
+        public Size Dimensions => new Size(this.imageDescriptor.Width, this.imageDescriptor.Height);
 
         private MemoryAllocator MemoryAllocator => this.configuration.MemoryAllocator;
 
@@ -107,7 +104,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
         /// <param name="stream">The stream containing image data. </param>
         /// <returns>The decoded image</returns>
         public Image<TPixel> Decode<TPixel>(Stream stream)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             Image<TPixel> image = null;
             ImageFrame<TPixel> previousFrame = null;
@@ -282,9 +279,8 @@ namespace SixLabors.ImageSharp.Formats.Gif
                 }
 
                 // Could be XMP or something else not supported yet.
-                // Back up and skip.
-                this.stream.Position -= appLength + 1;
-                this.SkipBlock(appLength);
+                // Skip the subblock and terminator.
+                this.SkipBlock(subBlockSize);
                 return;
             }
 
@@ -317,11 +313,12 @@ namespace SixLabors.ImageSharp.Formats.Gif
         {
             int length;
 
+            var stringBuilder = new StringBuilder();
             while ((length = this.stream.ReadByte()) != 0)
             {
-                if (length > GifConstants.MaxCommentLength)
+                if (length > GifConstants.MaxCommentSubBlockLength)
                 {
-                    throw new ImageFormatException($"Gif comment length '{length}' exceeds max '{GifConstants.MaxCommentLength}'");
+                    throw new ImageFormatException($"Gif comment length '{length}' exceeds max '{GifConstants.MaxCommentSubBlockLength}' of a comment data block");
                 }
 
                 if (this.IgnoreMetadata)
@@ -333,9 +330,14 @@ namespace SixLabors.ImageSharp.Formats.Gif
                 using (IManagedByteBuffer commentsBuffer = this.MemoryAllocator.AllocateManagedByteBuffer(length))
                 {
                     this.stream.Read(commentsBuffer.Array, 0, length);
-                    string comments = this.TextEncoding.GetString(commentsBuffer.Array, 0, length);
-                    this.metadata.Properties.Add(new ImageProperty(GifConstants.Comments, comments));
+                    string commentPart = GifConstants.Encoding.GetString(commentsBuffer.Array, 0, length);
+                    stringBuilder.Append(commentPart);
                 }
+            }
+
+            if (stringBuilder.Length > 0)
+            {
+                this.gifMetadata.Comments.Add(stringBuilder.ToString());
             }
         }
 
@@ -346,7 +348,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
         /// <param name="image">The image to decode the information to.</param>
         /// <param name="previousFrame">The previous frame.</param>
         private void ReadFrame<TPixel>(ref Image<TPixel> image, ref ImageFrame<TPixel> previousFrame)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             this.ReadImageDescriptor();
 
@@ -403,7 +405,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
         /// <param name="colorTable">The color table containing the available colors.</param>
         /// <param name="descriptor">The <see cref="GifImageDescriptor"/></param>
         private void ReadFrameColors<TPixel>(ref Image<TPixel> image, ref ImageFrame<TPixel> previousFrame, Span<byte> indices, ReadOnlySpan<Rgb24> colorTable, in GifImageDescriptor descriptor)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             ref byte indicesRef = ref MemoryMarshal.GetReference(indices);
             int imageWidth = this.logicalScreenDescriptor.Width;
@@ -533,7 +535,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
         /// <typeparam name="TPixel">The pixel format.</typeparam>
         /// <param name="frame">The frame.</param>
         private void RestoreToBackground<TPixel>(ImageFrame<TPixel> frame)
-            where TPixel : struct, IPixel<TPixel>
+            where TPixel : unmanaged, IPixel<TPixel>
         {
             if (this.restoreArea is null)
             {
@@ -553,7 +555,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void SetFrameMetadata(ImageFrameMetadata meta)
         {
-            GifFrameMetadata gifMeta = meta.GetFormatMetadata(GifFormat.Instance);
+            GifFrameMetadata gifMeta = meta.GetGifMetadata();
             if (this.graphicsControlExtension.DelayTime > 0)
             {
                 gifMeta.FrameDelay = this.graphicsControlExtension.DelayTime;
@@ -615,7 +617,7 @@ namespace SixLabors.ImageSharp.Formats.Gif
             }
 
             this.metadata = meta;
-            this.gifMetadata = meta.GetFormatMetadata(GifFormat.Instance);
+            this.gifMetadata = meta.GetGifMetadata();
             this.gifMetadata.ColorTableMode = this.logicalScreenDescriptor.GlobalColorTableFlag
             ? GifColorTableMode.Global
             : GifColorTableMode.Local;
