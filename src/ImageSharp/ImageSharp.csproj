@@ -10,9 +10,6 @@
     <VersionPrefix Condition="$(packageversion) != ''">$(packageversion)</VersionPrefix>
     <VersionPrefix Condition="$(packageversion) == ''">0.0.1</VersionPrefix>
 
-    <TargetFramework>netstandard2.0</TargetFramework>
-      
-    <TargetFrameworks>netcoreapp2.1;netstandard1.3;netstandard2.0;net472</TargetFrameworks>
     <TargetFrameworks>netcoreapp3.1;netcoreapp2.1;netstandard2.1;netstandard2.0;netstandard1.3;net472</TargetFrameworks>
 
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -22,95 +19,6 @@
     <RootNamespace>SixLabors.ImageSharp</RootNamespace>
   </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Include="..\Shared\*.cs" Exclude="bin\**;obj\**;**\*.xproj;packages\**" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <AdditionalFiles Include="..\..\standards\stylecop.json" />
-    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="4.5.2" />
-    <PackageReference Include="System.Memory" Version="4.5.2" />
-  </ItemGroup>
-
-  <PropertyGroup>
-    <CodeAnalysisRuleSet>..\..\standards\SixLabors.ruleset</CodeAnalysisRuleSet>
-    <RootNamespace>SixLabors.ImageSharp</RootNamespace>
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>BotasCore.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <Reference Include="SixLabors.Core">
-      <HintPath>..\..\..\Fonts\src\SixLabors.Fonts\bin\Release\netstandard2.0\SixLabors.Core.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Formats\Jpeg\Components\Block8x8F.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="Formats\Jpeg\Components\GenericBlock8x8.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>GenericBlock8x8.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="Formats\Jpeg\Components\Block8x8F.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Block8x8F.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelOperations{TPixel}.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>PixelOperations{TPixel}.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Argb32.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Argb32.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Bgr24.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Bgr24.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Bgra32.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Bgra32.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Gray8.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Gray8.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Gray16.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Gray16.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Rgb24.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Rgb24.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Rgba32.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Rgba32.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Rgb48.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Rgb48.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelImplementations\Generated\Rgba64.PixelOperations.Generated.tt">
-      <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>Rgba64.PixelOperations.Generated.cs</LastGenOutput>
-    </None>
-    <None Update="PixelFormats\PixelBlenders\PorterDuffFunctions.Generated.tt">
-      <LastGenOutput>PorterDuffFunctions.Generated.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <None Update="PixelFormats\PixelBlenders\DefaultPixelBlenders.Generated.tt">
-      <LastGenOutput>DefaultPixelBlenders.Generated.cs</LastGenOutput>
-      <Generator>TextTemplatingFileGenerator</Generator>
-    </None>
-    <Compile Include="..\Shared\*.cs" />
   <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
   </ItemGroup>

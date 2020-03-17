@@ -1,9 +1,5 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.26730.3
-VisualStudioVersion = 15.0.26730.10
-VisualStudioVersion = 15.0.26730.12
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28902.138
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -327,8 +323,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Tests", "tests\I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Benchmarks", "tests\ImageSharp.Benchmarks\ImageSharp.Benchmarks.csproj", "{2BF743D8-2A06-412D-96D7-F448F00C5EA5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Sandbox46", "tests\ImageSharp.Sandbox46\ImageSharp.Sandbox46.csproj", "{561B880A-D9EE-44EF-90F5-817C54A9D9AB}"
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "build", "build\build.csproj", "{575A5002-DD9F-4335-AA47-1DD87FA13645}"
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{C0D7754B-5277-438E-ABEB-2BA34401B5A7}"
 	ProjectSection(SolutionItems) = preProject
 		.github\workflows\build-and-test.yml = .github\workflows\build-and-test.yml
@@ -340,7 +334,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ImageSharp.Tests.ProfilingS
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems*{2aa31a1f-142c-43f4-8687-09abca4b3a26}*SharedItemsImports = 5
 		shared-infrastructure\src\SharedInfrastructure\SharedInfrastructure.projitems*{68a8cc40-6aed-4e96-b524-31b1158fdeea}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -388,30 +381,6 @@ Global
 		{2BF743D8-2A06-412D-96D7-F448F00C5EA5}.Release|x64.Build.0 = Release|Any CPU
 		{2BF743D8-2A06-412D-96D7-F448F00C5EA5}.Release|x86.ActiveCfg = Release|Any CPU
 		{2BF743D8-2A06-412D-96D7-F448F00C5EA5}.Release|x86.Build.0 = Release|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Debug|x64.Build.0 = Debug|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Debug|x86.Build.0 = Debug|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Release|x64.ActiveCfg = Release|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Release|x64.Build.0 = Release|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Release|x86.ActiveCfg = Release|Any CPU
-		{561B880A-D9EE-44EF-90F5-817C54A9D9AB}.Release|x86.Build.0 = Release|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Debug|x64.Build.0 = Debug|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Debug|x86.Build.0 = Debug|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Release|Any CPU.Build.0 = Release|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Release|x64.ActiveCfg = Release|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Release|x64.Build.0 = Release|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Release|x86.ActiveCfg = Release|Any CPU
-		{575A5002-DD9F-4335-AA47-1DD87FA13645}.Release|x86.Build.0 = Release|Any CPU
 		{FC527290-2F22-432C-B77B-6E815726B02C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{FC527290-2F22-432C-B77B-6E815726B02C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FC527290-2F22-432C-B77B-6E815726B02C}.Debug|x64.ActiveCfg = Debug|Any CPU
@@ -453,10 +422,6 @@ Global
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5F8B9D1F-CD8B-4CC5-8216-D531E25BD795}
-		{575A5002-DD9F-4335-AA47-1DD87FA13645} = {E919DF0B-2607-4462-8FC0-5C98FE50F8C9}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {CA5D2B48-C6D2-4C10-92CE-29EB50851C6F}
 	EndGlobalSection
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
