@@ -229,5 +229,15 @@ namespace SixLabors.ImageSharp
         /// <returns>Product of type SizeF.</returns>
         private static SizeF Multiply(SizeF size, float multiplier) =>
             new SizeF(size.Width * multiplier, size.Height * multiplier);
+
+        public static implicit operator System.Drawing.SizeF(SizeF size)
+        {
+            return new System.Drawing.SizeF(size.Width, size.Height);
+        }
+
+        public static implicit operator SizeF(System.Drawing.SizeF size)
+        {
+            return new SizeF(size.Width, size.Height);
+        }
     }
 }

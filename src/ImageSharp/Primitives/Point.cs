@@ -284,5 +284,15 @@ namespace SixLabors.ImageSharp
         private static short HighInt16(int n) => unchecked((short)((n >> 16) & 0xffff));
 
         private static short LowInt16(int n) => unchecked((short)(n & 0xffff));
+
+        public static implicit operator System.Drawing.Point(Point size)
+        {
+            return new System.Drawing.Point(size.X, size.Y);
+        }
+
+        public static implicit operator Point(System.Drawing.Point size)
+        {
+            return new Point(size.X, size.Y);
+        }
     }
 }

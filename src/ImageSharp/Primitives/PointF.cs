@@ -289,5 +289,15 @@ namespace SixLabors.ImageSharp
         /// <inheritdoc/>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public bool Equals(PointF other) => this.X.Equals(other.X) && this.Y.Equals(other.Y);
+
+        public static implicit operator System.Drawing.PointF(PointF size)
+        {
+            return new System.Drawing.PointF(size.X, size.Y);
+        }
+
+        public static implicit operator PointF(System.Drawing.PointF size)
+        {
+            return new PointF(size.X, size.Y);
+        }
     }
 }
