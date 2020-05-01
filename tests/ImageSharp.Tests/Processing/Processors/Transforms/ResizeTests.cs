@@ -1,5 +1,5 @@
 // Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System;
 using System.Linq;
@@ -244,7 +244,8 @@ namespace SixLabors.ImageSharp.Tests.Processing.Processors.Transforms
         {
             using (Image<TPixel> image0 = provider.GetImage())
             {
-                var mmg = TestMemoryManager<TPixel>.CreateAsCopyOf(image0.GetPixelSpan());
+                Assert.True(image0.TryGetSinglePixelSpan(out Span<TPixel> imageSpan));
+                var mmg = TestMemoryManager<TPixel>.CreateAsCopyOf(imageSpan);
 
                 using (var image1 = Image.WrapMemory(mmg.Memory, image0.Width, image0.Height))
                 {

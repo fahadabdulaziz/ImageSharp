@@ -1,5 +1,5 @@
-﻿// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Copyright (c) Six Labors and contributors.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System;
 using System.Numerics;
@@ -125,10 +125,7 @@ namespace SixLabors.ImageSharp
                     Vector4 s = Unsafe.Add(ref sBase, i);
                     s *= maxBytes;
                     s += half;
-
-                    // I'm not sure if Vector4.Clamp() is properly implemented with intrinsics.
-                    s = Vector4.Max(Vector4.Zero, s);
-                    s = Vector4.Min(maxBytes, s);
+                    s = Vector4Utilities.FastClamp(s, Vector4.Zero, maxBytes);
 
                     ref ByteVector4 d = ref Unsafe.Add(ref dBase, i);
                     d.X = (byte)s.X;

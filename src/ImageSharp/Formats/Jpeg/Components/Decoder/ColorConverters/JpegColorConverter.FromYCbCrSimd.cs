@@ -1,5 +1,5 @@
-﻿// Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Copyright (c) Six Labors and contributors.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System;
 using System.Numerics;
@@ -104,7 +104,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components.Decoder.ColorConverters
                     {
                         // TODO: Run fallback scalar code here
                         // However, no issues expected before someone implements this: https://github.com/dotnet/coreclr/issues/12007
-                        throw new NotImplementedException("Your CPU architecture is too modern!");
+                        JpegThrowHelper.ThrowNotImplementedException("Your CPU architecture is too modern!");
                     }
 
                     // Collect (r0,r1...r8) (g0,g1...g8) (b0,b1...b8) vector values in the expected (r0,g0,g1,1), (r1,g1,g2,1) ... order:

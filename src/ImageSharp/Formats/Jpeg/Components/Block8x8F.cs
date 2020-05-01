@@ -1,5 +1,5 @@
 // Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System;
 using System.Diagnostics;
@@ -589,7 +589,7 @@ namespace SixLabors.ImageSharp.Formats.Jpeg.Components
         private static Vector4 DivideRound(Vector4 dividend, Vector4 divisor)
         {
             // sign(dividend) = max(min(dividend, 1), -1)
-            var sign = Vector4.Clamp(dividend, NegativeOne, Vector4.One);
+            var sign = Vector4Utilities.FastClamp(dividend, NegativeOne, Vector4.One);
 
             // AlmostRound(dividend/divisor) = dividend/divisor + 0.5*sign(dividend)
             return (dividend / divisor) + (sign * Offset);

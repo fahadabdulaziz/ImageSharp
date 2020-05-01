@@ -1,5 +1,5 @@
 // Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System;
 using System.Diagnostics;
@@ -28,7 +28,7 @@ namespace SixLabors.ImageSharp
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         internal static Vector4 PseudoRound(this Vector4 v)
         {
-            var sign = Vector4.Clamp(v, new Vector4(-1), new Vector4(1));
+            var sign = Vector4Utilities.FastClamp(v, new Vector4(-1), new Vector4(1));
 
             return v + (sign * 0.5f);
         }
