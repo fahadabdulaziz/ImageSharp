@@ -1,5 +1,5 @@
 // Copyright (c) Six Labors and contributors.
-// Licensed under the Apache License, Version 2.0.
+// Licensed under the GNU Affero General Public License, Version 3.
 
 using System;
 using System.Linq;
@@ -156,7 +156,7 @@ namespace SixLabors.ImageSharp.Memory
         {
             DebugGuard.MustBeGreaterThanOrEqualTo(y, 0, nameof(y));
             DebugGuard.MustBeLessThan(y, this.Height, nameof(y));
-            return this.FastMemoryGroup.View.GetBoundedSlice(y * this.Width, this.Width);
+            return this.FastMemoryGroup.View.GetBoundedSlice(y * (long)this.Width, this.Width);
         }
 
         /// <summary>
@@ -200,7 +200,7 @@ namespace SixLabors.ImageSharp.Memory
         }
 
         [MethodImpl(InliningOptions.ColdPath)]
-        private Memory<T> GetRowMemorySlow(int y) => this.FastMemoryGroup.GetBoundedSlice(y * this.Width, this.Width);
+        private Memory<T> GetRowMemorySlow(int y) => this.FastMemoryGroup.GetBoundedSlice(y * (long)this.Width, this.Width);
 
         [MethodImpl(InliningOptions.ColdPath)]
         private Memory<T> GetSingleMemorySlow() => this.FastMemoryGroup.Single();
